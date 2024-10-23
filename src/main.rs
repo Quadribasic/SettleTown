@@ -1,25 +1,31 @@
 use macroquad::prelude::*;
+
+mod game;
 mod graphics;
+mod world;
+
+const WINDOW_WIDTH: i32 = 1920;
+const WINDOW_HEIGHT: i32 = 768;
 
 fn window_config() -> Conf {
     Conf {
         window_title: "SettleTown".to_owned(),
         fullscreen: false,
         // high_dpi: true,
-        window_width: 1200,
-        window_height: 1200,
+        window_width: WINDOW_WIDTH,
+        window_height: WINDOW_HEIGHT,
         ..Default::default()
     }
 }
 
 #[macroquad::main(window_config)]
 async fn main() {
-    let renderer = graphics::Renderer::new();
+    let mut engine = game::Engine::new(WINDOW_WIDTH as f32, WINDOW_HEIGHT as f32);
 
     'gameloop: loop {
         clear_background(BLACK);
 
-        renderer.draw();
+        engine.draw_map();
 
         next_frame().await;
 
