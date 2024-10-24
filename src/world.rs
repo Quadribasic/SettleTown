@@ -1,47 +1,43 @@
-use std::collections::HashMap;
+use std::fmt::Display;
 
-use macroquad::texture::Texture2D;
-
-use crate::graphics::{TILE_SIZE_X, TILE_SIZE_Y};
+use crate::graphics::{TileType, TILE_SIZE_X, TILE_SIZE_Y};
 
 #[derive(Debug)]
 pub struct WorldError {
     message: String,
 }
 
-#[derive(Clone, Copy, PartialEq, Hash, Eq)]
-pub enum WorldBlockType {
-    Desert,
-    Grass,
+impl Display for WorldError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.message)
+    }
 }
 
+/// The World represents the logical items in the game world. This includes the map or base ground
+/// layer, the buildings, obstacles, terrain, and characters (both player and non-player).
 pub struct World {
     window_width: f32,
     window_height: f32,
-    tile_types: Vec<Vec<WorldBlockType>>,
-    block_textures: HashMap<WorldBlockType, Texture2D>,
+    tile_types: Vec<Vec<TileType>>,
 }
 
 impl World {
     pub fn new(window_width: f32, window_height: f32) -> Self {
-        let block_textures = HashMap::new();
-
         let mut instance = Self {
             window_width,
             window_height,
             tile_types: vec![],
-            block_textures,
         };
 
         let world_size = instance.get_world_size_in_tiles();
         for i in 0..world_size.0 {
-            let mut tile_row: Vec<WorldBlockType> = Vec::new();
+            let mut tile_row: Vec<TileType> = Vec::new();
 
-            for j in 0..world_size.1 {
+            for _j in 0..world_size.1 {
                 if i > 12 && i < 16 {
-                    tile_row.push(WorldBlockType::Grass);
+                    tile_row.push(TileType::Grass);
                 } else {
-                    tile_row.push(WorldBlockType::Desert);
+                    tile_row.push(TileType::Dirt);
                 }
             }
 
@@ -58,7 +54,7 @@ impl World {
         (world_width_tiles, world_height_tiles)
     }
 
-    pub fn get_tile_type_at(&self, x: usize, y: usize) -> Result<WorldBlockType, WorldError> {
+    pub fn get_tile_type_at(&self, x: usize, y: usize) -> Result<TileType, WorldError> {
         let world_size = self.get_world_size_in_tiles();
 
         if x > world_size.0 || y > world_size.1 {
@@ -67,27 +63,6 @@ impl World {
             });
         }
 
-        Ok(self.tile_types[x][y])
-    }
-
-    pub fn get_texture_for(&mut self, block_type: WorldBlockType) -> Texture2D {
-        if self.block_textures.contains_key(&block_type) {
-            self.block_textures.get(&block_type).unwrap().clone()
-        } else {
-            let texture = match block_type {
-                WorldBlockType::Desert => Texture2D::from_file_with_format(
-                    include_bytes!("../assets/desert-tiles/plain-desert-tile-1.png"),
-                    None,
-                ),
-                WorldBlockType::Grass => Texture2D::from_file_with_format(
-                    include_bytes!("../assets/dummy-lpc/tiles/grass-basic-1.png"),
-                    None,
-                ),
-            };
-
-            self.block_textures.insert(block_type, texture.clone());
-
-            texture
-        }
+        Ok(self.tile_types[x][y].clone())
     }
 }
