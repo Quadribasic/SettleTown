@@ -26,6 +26,7 @@ pub enum TileType {
     // Desert,
     Dirt,
     Grass,
+    GrassAlternate1,
 }
 
 impl PartialEq<String> for TileType {
@@ -99,10 +100,10 @@ pub struct Renderer {
 impl Renderer {
     pub async fn new(window_width: f32, window_height: f32) -> Self {
         let asset_loader = AssetLoader::new(ASSETS_JSON_FILE);
-        let texture_atlas = match asset_loader.load_texture_atlas_from_file() {
-            Ok(x) => Some(x),
-            Err(e) => {
-                println!("Error: Unable to load texture atlas from file {:?}. Error was: {:?}. All textures will be the default texture!", ASSETS_JSON_FILE, e);
+        let texture_atlas = match asset_loader.get_texture_atlas() {
+            Some(x) => Some(x),
+            None => {
+                println!("Error: Unable to load texture atlas from file {:?}. All textures from this asset file will be the default texture!", ASSETS_JSON_FILE);
                 None
             }
         };
@@ -131,7 +132,7 @@ impl Renderer {
         }
     }
 
-    async fn get_renderable_tile_for(&mut self, tile_type: &TileType) -> RenderableTile {
+    pub async fn get_renderable_tile_for(&mut self, tile_type: &TileType) -> RenderableTile {
         if self.texture_atlas.is_none() {
             let default_texture = self.default_texture.clone();
             return RenderableTile::new(0, 0, 32, 32, default_texture).await;
@@ -148,6 +149,7 @@ impl Renderer {
             } else {
                 let tile_description = tile_description_option.unwrap();
                 let tile_start = tile_description.get_start_location();
+
                 let tile_size = tile_description.cell_size;
                 let texture_file = self
                     .texture_manager
@@ -166,19 +168,13 @@ impl Renderer {
     }
 
     pub async fn draw_world(&mut self) {
-        let world_size = self.game_world.get_world_size_in_tiles();
-        for i in 0..world_size.0 {
-            for j in 0..world_size.1 {
-                let tile_type = self.game_world.get_tile_type_at(i, j).unwrap();
-                // let tile_texture = self.get_texture_for_tile_type(&tile_type);
-                // let renderable_tile = RenderableTile::new(self, 0, 0, 32, 32, tile_texture).await;
-                let renderable_tile = self.get_renderable_tile_for(&tile_type).await;
-                renderable_tile.draw((i as f32) * TILE_SIZE_X, (j as f32) * TILE_SIZE_Y);
-            }
-        }
+        let mut game_world = self.game_world.clone();
+        game_world.draw(self).await;
+        self.game_world = game_world;
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct RenderableTile {
     source_x: u32,
     source_y: u32,

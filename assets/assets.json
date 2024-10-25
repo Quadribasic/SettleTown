@@ -4,8 +4,8 @@
             "name": "Grass",
             "file": "dummy-lpc/tiles/grass.png",
             "cell": {
-                "x": 1,
-                "y": 3
+                "row": 3,
+                "column": 1
             },
             "cell_size": {
                 "width": 32,
@@ -16,8 +16,56 @@
             "name": "Dirt",
             "file": "dummy-lpc/tiles/dirt.png",
             "cell": {
-                "x": 1,
-                "y": 3
+                "row": 3,
+                "column": 1
+            },
+            "cell_size": {
+                "width": 32,
+                "height": 32
+            }
+        },
+        {
+            "name": "GrassAlternate1",
+            "file": "dummy-lpc/tiles/grass.png",
+            "alternative": {
+                "target": "Grass",
+                "percentage": 0.01
+            },
+            "cell": {
+                "row": 5,
+                "column": 0
+            },
+            "cell_size": {
+                "width": 32,
+                "height": 32
+            }
+        },
+        {
+            "name": "GrassAlternate2",
+            "file": "dummy-lpc/tiles/grass.png",
+            "alternative": {
+                "target": "Grass",
+                "percentage": 0.05
+            },
+            "cell": {
+                "row": 5,
+                "column": 1
+            },
+            "cell_size": {
+                "width": 32,
+                "height": 32
+            }
+        },
+        {
+            "name": "GrassAlternate3",
+            "file": "dummy-lpc/tiles/grass.png",
+            "alternative": {
+                "target": "Grass",
+                "percentage": 0.05
+            },
+            "cell": {
+                "row": 5,
+                "column": 2
             },
             "cell_size": {
                 "width": 32,

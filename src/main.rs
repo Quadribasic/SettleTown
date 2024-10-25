@@ -6,7 +6,6 @@ use log::error;
 use macroquad::prelude::*;
 
 mod assets;
-mod game;
 mod graphics;
 mod world;
 
