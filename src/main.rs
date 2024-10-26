@@ -1,12 +1,12 @@
-use std::{fs, path::Path};
-
-use colored::Colorize;
+use clap::{command, Parser};
 use graphics::Renderer;
 use log::error;
+use logger::setup_logger;
 use macroquad::prelude::*;
 
 mod assets;
 mod graphics;
+mod logger;
 mod world;
 
 const WINDOW_WIDTH: i32 = 1920;
@@ -22,60 +22,13 @@ fn window_config() -> Conf {
     }
 }
 
-fn setup_logger() -> Result<(), fern::InitError> {
-    let log_dir = Path::new("log");
-    if !log_dir.exists() {
-        fs::create_dir(log_dir)?;
-    }
-
-    let mut log_file = log_dir.join("debug.log");
-    if log_file.exists() {
-        fs::remove_file(log_file)?;
-    }
-
-    log_file = log_dir.join("debug.log");
-
-    fern::Dispatch::new()
-        .chain(
-            fern::Dispatch::new()
-                .format(|out, message, record| {
-                    out.finish(format_args!(
-                        "{}[{}][{}] {}",
-                        chrono::Local::now().format("[%Y-%m-%d][%H:%M:%S]"),
-                        record.target(),
-                        record.level().to_string(),
-                        message
-                    ))
-                })
-                .level(log::LevelFilter::Debug)
-                // .chain(std::io::stdout())
-                .chain(fern::log_file(&log_file)?),
-        )
-        .chain(
-            fern::Dispatch::new()
-                .format(|out, message, record| {
-                    let colored_record_level = match record.level() {
-                        log::Level::Debug => record.level().to_string().blue(),
-                        log::Level::Info => record.level().to_string().blue(),
-                        log::Level::Trace => record.level().to_string().purple(),
-                        log::Level::Warn => record.level().to_string().yellow(),
-                        log::Level::Error => record.level().to_string().red(),
-                    };
-
-                    out.finish(format_args!(
-                        "{}[{}][{}] {}",
-                        chrono::Local::now().format("[%Y-%m-%d][%H:%M:%S]"),
-                        record.target(),
-                        colored_record_level,
-                        message
-                    ))
-                })
-                .level(log::LevelFilter::Debug)
-                .chain(std::io::stdout()),
-        )
-        .apply()?;
-
-    Ok(())
+/// SettleTown is a game where you get to found a town in the old west.
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    /// The path to a map file to load, if one has been previously saved.
+    #[arg(short, long)]
+    map_file: Option<String>,
 }
 
 #[macroquad::main(window_config)]
@@ -87,7 +40,10 @@ async fn main() {
         }
     }
 
-    let mut renderer = Renderer::new(WINDOW_WIDTH as f32, WINDOW_HEIGHT as f32).await;
+    let args = Args::parse();
+
+    let mut renderer =
+        Renderer::new(WINDOW_WIDTH as f32, WINDOW_HEIGHT as f32, args.map_file).await;
 
     'gameloop: loop {
         clear_background(BLACK);

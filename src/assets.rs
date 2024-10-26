@@ -222,6 +222,14 @@ impl TextureAtlas {
 }
 
 #[cfg(test)]
+#[ctor::ctor]
+fn init_tests() {
+    use crate::logger::setup_logger;
+
+    setup_logger().unwrap();
+}
+
+#[cfg(test)]
 mod tests {
     use crate::graphics::TileType;
 
@@ -233,7 +241,7 @@ mod tests {
         assert!(asset_loader.texture_atlas.is_some());
 
         let texture_atlas = asset_loader.get_texture_atlas().unwrap();
-        assert_eq!(texture_atlas.tiles.len(), 3);
+        assert_eq!(texture_atlas.tiles.len(), 5);
 
         let mut tile_iter = texture_atlas.tiles.iter();
         let tile1 = tile_iter.next().unwrap();
@@ -256,7 +264,7 @@ mod tests {
         assert!(asset_loader.texture_atlas.is_some());
 
         let texture_atlas = asset_loader.get_texture_atlas().unwrap();
-        assert_eq!(texture_atlas.tiles.len(), 3);
+        assert_eq!(texture_atlas.tiles.len(), 5);
 
         let mut tile_iter = texture_atlas.tiles.iter();
         let _tile1 = tile_iter.next().unwrap();
@@ -278,15 +286,15 @@ mod tests {
     }
 
     #[test]
-    fn it_should_have_one_alternative_for_grass() {
+    fn it_should_have_three_alternatives_for_grass() {
         let asset_loader = AssetLoader::new("assets/assets.json");
         assert!(asset_loader.texture_atlas.is_some());
 
         let mut texture_atlas = asset_loader.get_texture_atlas().unwrap();
-        assert_eq!(texture_atlas.tiles.len(), 3);
+        assert_eq!(texture_atlas.tiles.len(), 5);
 
         let alternatives = texture_atlas.get_alternatives_for(&TileType::Grass);
-        assert_eq!(alternatives.len(), 1);
+        assert_eq!(alternatives.len(), 3);
 
         let first_alt = alternatives.iter().next().unwrap();
         assert_eq!(first_alt.name, "GrassAlternate1".to_string());

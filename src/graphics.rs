@@ -1,4 +1,5 @@
 use core::fmt;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use macroquad::{
@@ -21,7 +22,7 @@ pub const TILE_SIZE_Y: f32 = 32.0;
 
 const ASSETS_JSON_FILE: &'static str = "assets/assets.json";
 
-#[derive(Debug, EnumIter, PartialEq, Eq, Hash, Clone)]
+#[derive(Clone, Debug, Deserialize, EnumIter, Eq, Hash, PartialEq, Serialize)]
 pub enum TileType {
     // Desert,
     Dirt,
@@ -37,7 +38,8 @@ impl PartialEq<String> for TileType {
             return false;
         }
 
-        &lhs_string == other
+        lhs_string = lhs_string.to_lowercase();
+        lhs_string == other.to_lowercase()
     }
 }
 
@@ -83,8 +85,6 @@ impl PartialEq<TileType> for &str {
 /// The renderer is the entry point to all drawing operations. It controls the state of the world
 /// and displays this state within the window that's set up by the main application.
 pub struct Renderer {
-    // window_width: f32,
-    // window_height: f32,
     game_world: World,
 
     // A set of layers to render, from lowest to highest
@@ -98,7 +98,7 @@ pub struct Renderer {
 }
 
 impl Renderer {
-    pub async fn new(window_width: f32, window_height: f32) -> Self {
+    pub async fn new(window_width: f32, window_height: f32, map_file: Option<String>) -> Self {
         let asset_loader = AssetLoader::new(ASSETS_JSON_FILE);
         let texture_atlas = match asset_loader.get_texture_atlas() {
             Some(x) => Some(x),
@@ -113,7 +113,7 @@ impl Renderer {
                 include_bytes!("../assets/default-texture.png"),
                 None,
             ),
-            game_world: World::new(window_width, window_height),
+            game_world: World::new_from_map_file(window_width, window_height, map_file),
             // layers: vec![Layer::new(None)],
             texture_atlas,
             renderable_tiles: HashMap::new(),
