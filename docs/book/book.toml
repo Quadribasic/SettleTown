@@ -1,0 +1,6 @@
+[book]
+authors = ["Scott Johnson"]
+language = "en"
+multilingual = false
+src = "book-src"
+title = "Developing SettleTown"

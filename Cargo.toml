@@ -3,8 +3,15 @@ name = "SettleTown"
 version = "0.0.1"
 edition = "2021"
 
+[workspace]
+resolver = "2"
+
 [dependencies]
-bevy = "0.14.2"
+bevy = "0.14.0"
+# bevy = { git = "https://github.com/bevyengine/bevy", branch = "release-0.15.0" }
+bevy_ecs_tilemap = "0.14.0"
+rand = "0.8.5"
+# bevy_tiles = "0.1.0"
 
 [dev-dependencies]
 "ctor" = "0.2.8"
