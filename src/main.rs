@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use bevy::{
     core::FrameCount,
     diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
@@ -59,25 +57,24 @@ fn main() {
         .add_plugins(SettleTownMapPlugin)
         .insert_resource(
             MapBuilder::new(320, 320, GroundTileType::Grass)
-                .add_edge_type_for_tile(
+                .add_edges_and_corner_tiles_for_base_tile(
                     GroundTileType::Grass,
-                    EdgeDirection::Top,
-                    GroundTileType::GrassEdgeTop,
-                )
-                .add_edge_type_for_tile(
-                    GroundTileType::Grass,
-                    EdgeDirection::Bottom,
-                    GroundTileType::GrassEdgeBottom,
-                )
-                .add_edge_type_for_tile(
-                    GroundTileType::Grass,
-                    EdgeDirection::Left,
-                    GroundTileType::GrassEdgeLeft,
-                )
-                .add_edge_type_for_tile(
-                    GroundTileType::Grass,
-                    EdgeDirection::Right,
-                    GroundTileType::GrassEdgeRight,
+                    vec![
+                        (EdgeDirection::TopLeft, GroundTileType::GrassEdgeTopLeft),
+                        (EdgeDirection::Top, GroundTileType::GrassEdgeTop),
+                        (EdgeDirection::TopRight, GroundTileType::GrassEdgeTopRight),
+                        (EdgeDirection::Right, GroundTileType::GrassEdgeRight),
+                        (
+                            EdgeDirection::BottomRight,
+                            GroundTileType::GrassEdgeBottomRight,
+                        ),
+                        (EdgeDirection::Bottom, GroundTileType::GrassEdgeBottom),
+                        (
+                            EdgeDirection::BottomLeft,
+                            GroundTileType::GrassEdgeBottomLeft,
+                        ),
+                        (EdgeDirection::Left, GroundTileType::GrassEdgeLeft),
+                    ],
                 )
                 .add_alternative_for(
                     GroundTileType::Grass,

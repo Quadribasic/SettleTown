@@ -1,4 +1,4 @@
-use bevy::{input::keyboard, prelude::*};
+use bevy::prelude::*;
 
 use super::map::OverheadMapCamera;
 
@@ -18,14 +18,22 @@ fn keyboard_input_system(
     let mut horizontal_movement = 0.0;
     let mut vertical_movement = 0.0;
 
+    let mut shift_multiplier = 1.0;
+
+    if keyboard_input.pressed(KeyCode::ShiftLeft) || keyboard_input.pressed(KeyCode::ShiftRight) {
+        shift_multiplier = 10.0;
+    }
+
     if keyboard_input.pressed(KeyCode::ArrowRight) {
-        horizontal_movement -= CAMERA_MOVEMENT_SPEED
+        horizontal_movement -= shift_multiplier * CAMERA_MOVEMENT_SPEED
     } else if keyboard_input.pressed(KeyCode::ArrowLeft) {
-        horizontal_movement += CAMERA_MOVEMENT_SPEED;
-    } else if keyboard_input.pressed(KeyCode::ArrowUp) {
-        vertical_movement -= CAMERA_MOVEMENT_SPEED;
+        horizontal_movement += shift_multiplier * CAMERA_MOVEMENT_SPEED;
+    }
+
+    if keyboard_input.pressed(KeyCode::ArrowUp) {
+        vertical_movement -= shift_multiplier * CAMERA_MOVEMENT_SPEED;
     } else if keyboard_input.pressed(KeyCode::ArrowDown) {
-        vertical_movement += CAMERA_MOVEMENT_SPEED;
+        vertical_movement += shift_multiplier * CAMERA_MOVEMENT_SPEED;
     }
 
     projection.viewport_origin = Vec2::new(

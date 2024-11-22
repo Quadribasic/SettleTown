@@ -1,6 +1,5 @@
 use bevy::prelude::Resource;
 use bevy_ecs_tilemap::map::TilemapSize;
-use rand::{thread_rng, Rng};
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum EdgeDirection {
@@ -14,52 +13,21 @@ pub enum EdgeDirection {
     Left,
 }
 
-// #[derive(PartialEq, Clone)]
-// pub struct GroundTileType {
-//     texture_index: u32,
-//     name: &'static str,
-//     texture_path: &'static str,
-// }
-
-// impl GroundTileType {
-//     const fn new(name: &'static str, texture_index: u32, texture_path: &'static str) -> Self {
-//         Self {
-//             name,
-//             texture_index,
-//             texture_path,
-//         }
-//     }
-// }
-
-// impl Into<u32> for GroundTileType {
-//     fn into(self) -> u32 {
-//         self.texture_index
-//     }
-// }
-
-// pub const GRASS: GroundTileType = GroundTileType::new("Grass", 10, "dummy-lpc/tiles/grass.png");
-// pub const GRASS_ALTERNATE1: GroundTileType =
-//     GroundTileType::new("GrassAlternate1", 15, "dummy-lpc/tiles/grass.png");
-// pub const GRASS_ALTERNATE2: GroundTileType =
-//     GroundTileType::new("GrassAlternate2", 16, "dummy-lpc/tiles/grass.png");
-// pub const GRASS_ALTERNATE3: GroundTileType =
-//     GroundTileType::new("GrassAlternate3", 17, "dummy-lpc/tiles/grass.png");
-// pub const DIRT: GroundTileType = GroundTileType::new("Dirt", 10, "dummy-lpc/tiles/dirt.png");
-
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub enum GroundTileType {
-    Grass = 10,
-    GrassEdgeTopLeft = 6,
-    GrassEdgeTop = 7,
-    GrassEdgeTopRight = 8,
-    GrassEdgeLeft = 9,
-    GrassEdgeRight = 11,
-    GrassEdgeBottomLeft = 12,
-    GrassEdgeBottom = 13,
-    GrassEdgeBottomRight = 14,
-    GrassAlternate1 = 15,
-    GrassAlternate2 = 16,
-    GrassAlternate3 = 17,
+    GrassEdgeTopLeft = 12,
+    GrassEdgeTop = 13,
+    GrassEdgeTopRight = 14,
+    GrassEdgeLeft = 18,
+    Grass = 19,
+    GrassEdgeRight = 20,
+    Dirt = 22,
+    GrassEdgeBottomLeft = 24,
+    GrassEdgeBottom = 25,
+    GrassEdgeBottomRight = 26,
+    GrassAlternate1 = 30,
+    GrassAlternate2 = 31,
+    GrassAlternate3 = 32,
 }
 
 impl Into<u32> for GroundTileType {
