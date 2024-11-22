@@ -5,8 +5,13 @@
     },
     "activeFile": "Grass-Tiles.tmx",
     "expandedProjectPaths": [
+        "."
     ],
     "fileStates": {
+        "Dirt1.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
         "Grass-Tiles.tmx": {
             "scale": 0.1843,
             "selectedLayer": 0,
@@ -31,12 +36,13 @@
     "map.width": 100,
     "openFiles": [
         "Grass-Tiles.tmx",
-        "Grass-Tiles.tsx"
+        "Dirt1.tsx"
     ],
     "project": "RiverRoad.tiled-project",
     "recentFiles": [
-        "Grass-Tiles.tsx",
-        "Grass-Tiles.tmx"
+        "Dirt1.tsx",
+        "Grass-Tiles.tmx",
+        "Grass-Tiles.tsx"
     ],
     "tileset.lastUsedFormat": "tsx"
 }

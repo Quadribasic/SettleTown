@@ -11,12 +11,15 @@ mod plugins;
 mod resources;
 
 // use bevy_tiles::{commands::TileCommandExt, coords::CoordIterator, tiles_2d::*, TilesPlugin};
-use plugins::{input::SettleTownInputPlugin, map::SettleTownMapPlugin};
+use plugins::{
+    input::SettleTownInputPlugin,
+    map::{MapBuilder, SettleTownMapPlugin},
+};
 
 // use components::world_position::WorldPosition;
 // use resources::map::Map;
 
-use resources::ground::Map;
+use resources::ground::{EdgeDirection, GroundTileType};
 
 const WINDOW_WIDTH: i32 = 1408;
 const WINDOW_HEIGHT: i32 = 768;
@@ -54,7 +57,45 @@ fn main() {
         ))
         .add_plugins(SettleTownInputPlugin)
         .add_plugins(SettleTownMapPlugin)
-        .insert_resource(Map::new(320, 320))
+        .insert_resource(
+            MapBuilder::new(320, 320, GroundTileType::Grass)
+                .add_edge_type_for_tile(
+                    GroundTileType::Grass,
+                    EdgeDirection::Top,
+                    GroundTileType::GrassEdgeTop,
+                )
+                .add_edge_type_for_tile(
+                    GroundTileType::Grass,
+                    EdgeDirection::Bottom,
+                    GroundTileType::GrassEdgeBottom,
+                )
+                .add_edge_type_for_tile(
+                    GroundTileType::Grass,
+                    EdgeDirection::Left,
+                    GroundTileType::GrassEdgeLeft,
+                )
+                .add_edge_type_for_tile(
+                    GroundTileType::Grass,
+                    EdgeDirection::Right,
+                    GroundTileType::GrassEdgeRight,
+                )
+                .add_alternative_for(
+                    GroundTileType::Grass,
+                    GroundTileType::GrassAlternate1,
+                    0.033,
+                )
+                .add_alternative_for(
+                    GroundTileType::Grass,
+                    GroundTileType::GrassAlternate2,
+                    0.033,
+                )
+                .add_alternative_for(
+                    GroundTileType::Grass,
+                    GroundTileType::GrassAlternate3,
+                    0.033,
+                )
+                .build(),
+        )
         .add_systems(
             Update,
             (
