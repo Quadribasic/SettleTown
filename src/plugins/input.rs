@@ -40,6 +40,11 @@ fn keyboard_input_system(
         projection.viewport_origin.x + horizontal_movement,
         projection.viewport_origin.y + vertical_movement,
     );
+
+    // info!(
+    //     "Viewport Origin is now: ({}, {})",
+    //     projection.viewport_origin.x, projection.viewport_origin.y
+    // );
 }
 
 pub struct SettleTownInputPlugin;

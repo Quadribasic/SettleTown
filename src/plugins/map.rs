@@ -6,14 +6,19 @@ use bevy::{
     prelude::{Camera2dBundle, Commands, Component, Res},
 };
 use bevy_ecs_tilemap::{
-    map::{TilemapId, TilemapTexture, TilemapTileSize, TilemapType},
+    map::{TilemapId, TilemapSize, TilemapTexture, TilemapTileSize, TilemapType},
     prelude::get_tilemap_center_transform,
     tiles::{TileBundle, TilePos, TileStorage, TileTextureIndex},
     TilemapBundle, TilemapPlugin,
 };
 use rand::{thread_rng, Rng};
 
-use crate::resources::ground::{EdgeDirection, GroundTileType, Map};
+use mapgen::MapBuilder as MapgenMapBuilder;
+use mapgen::{
+    filter::CellularAutomata, AreaStartingPosition, NoiseGenerator, TileType, XStart, YStart,
+};
+
+use super::layer::{EdgeDirection, GroundTileType, Layer};
 
 pub struct SettleTownMapPlugin;
 
@@ -27,21 +32,25 @@ impl Plugin for SettleTownMapPlugin {
 #[derive(Component)]
 pub struct OverheadMapCamera;
 
-fn setup_map(mut commands: Commands, asset_server: Res<AssetServer>, ground: Res<Map>) {
+fn setup_map(mut commands: Commands, asset_server: Res<AssetServer>, ground: Res<Layer>) {
     commands.spawn((Camera2dBundle::default(), OverheadMapCamera));
 
-    let map_size = ground.get_map_size();
-    let width = map_size.x as u32;
-    let height = map_size.y as u32;
+    let map_size = ground.get_size();
+    let width = map_size.0 as u32;
+    let height = map_size.1 as u32;
+    let tilemap_size = TilemapSize {
+        x: width,
+        y: height,
+    };
 
     let grass_texture = asset_server.load("ground.png");
 
-    let mut tile_storage = TileStorage::empty(map_size);
+    let mut tile_storage = TileStorage::empty(tilemap_size);
     let tilemap_entity = commands.spawn_empty().id();
 
     for x in 0..width {
         for y in 0..height {
-            let ground_type = ground.get_ground_type_at(x as usize, y as usize).unwrap();
+            let ground_type = ground.get_tile_type_at(x as usize, y as usize).unwrap();
             let tile_pos = TilePos { x, y };
             let tile_entity = commands
                 .spawn((TileBundle {
@@ -62,26 +71,26 @@ fn setup_map(mut commands: Commands, asset_server: Res<AssetServer>, ground: Res
     commands.entity(tilemap_entity).insert(TilemapBundle {
         grid_size,
         map_type,
-        size: map_size,
+        size: tilemap_size,
         storage: tile_storage,
         texture: TilemapTexture::Single(grass_texture),
         tile_size,
-        transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 0.0),
+        transform: get_tilemap_center_transform(&tilemap_size, &grid_size, &map_type, 0.0),
         ..Default::default()
     });
 }
 
 #[derive(Clone)]
 pub struct MapBuilder {
-    map_in_progress: Map,
+    ground_layer: Layer,
     edge_map: HashMap<(GroundTileType, EdgeDirection), GroundTileType>,
 }
 
 impl MapBuilder {
-    pub fn new(width: u32, height: u32, base_type: GroundTileType) -> Self {
-        let map = Map::new(width, height, base_type);
+    pub fn new(width: usize, height: usize, base_type: GroundTileType) -> Self {
+        let map = Layer::new_from_base_tile(width, height, base_type);
         MapBuilder {
-            map_in_progress: map,
+            ground_layer: map,
             edge_map: HashMap::new(),
         }
     }
@@ -92,38 +101,28 @@ impl MapBuilder {
         alternative_type: GroundTileType,
         percent: f64,
     ) -> Self {
-        let map_size = self.map_in_progress.get_map_size();
+        let map_size = self.ground_layer.get_size();
         let mut rng = thread_rng();
-        for i in 0..map_size.x {
-            for j in 0..map_size.y {
-                match self
-                    .map_in_progress
-                    .get_ground_type_at(i as usize, j as usize)
-                {
-                    None => panic!(
-                        "Cannot build a map because there is nothing at ({}, {})",
-                        i, j
-                    ),
-                    Some(g) => {
-                        if g == ground_type {
-                            let random_num = rng.gen_range(0.0..1.0);
-                            if random_num < percent {
-                                self.map_in_progress.set_ground_type_at(
-                                    i as usize,
-                                    j as usize,
-                                    alternative_type.clone(),
-                                );
-                            }
+        for i in 0..map_size.0 {
+            for j in 0..map_size.1 {
+                if let Some(tile_type_at_position) = self.ground_layer.get_tile_type_at(i, j) {
+                    if tile_type_at_position == ground_type {
+                        let random_num = rng.gen_range(0.0..1.0);
+                        if random_num < percent {
+                            self.ground_layer
+                                .set_tile_type_at(i, j, alternative_type.clone());
                         }
                     }
+                } else {
+                    panic!(
+                        "Cannot add an alternative for tile because there is nothing at ({}, {})",
+                        i, j
+                    );
                 }
             }
         }
 
-        Self {
-            map_in_progress: self.map_in_progress.clone(),
-            edge_map: self.edge_map.clone(),
-        }
+        self.clone()
     }
 
     pub fn add_edges_and_corner_tiles_for_base_tile(
@@ -146,8 +145,11 @@ impl MapBuilder {
     ) -> Self {
         self.edge_map
             .insert((base_tile.clone(), direction), edge_tile_type);
-        if base_tile == self.map_in_progress.get_default_ground_tile() {
-            self.adjust_tiles_for_edges_of_map()
+
+        if let Some(default_tile) = self.ground_layer.get_default_tile_type() {
+            if base_tile == default_tile {
+                self.adjust_tiles_for_edges_of_map()
+            }
         }
 
         self.clone()
@@ -163,93 +165,161 @@ impl MapBuilder {
     }
 
     fn replace_tiles_along_edge(&mut self, direction: EdgeDirection) {
-        let replacement_tile = self.edge_map.get(&(
-            self.map_in_progress.get_default_ground_tile(),
-            direction.clone(),
-        ));
+        let map_size = self.ground_layer.get_size();
+        if let Some(default_tile) = self.ground_layer.get_default_tile_type() {
+            if let Some(replacement_tile) = self.edge_map.get(&(default_tile, direction.clone())) {
+                if direction == EdgeDirection::Top || direction == EdgeDirection::Bottom {
+                    let mut y_value = 0;
+                    if direction == EdgeDirection::Top {
+                        y_value = map_size.1 - 1
+                    }
 
-        let map_size = self.map_in_progress.get_map_size();
-        if replacement_tile.is_some() {
-            if direction == EdgeDirection::Top || direction == EdgeDirection::Bottom {
-                let mut y_value = 0;
-                if direction == EdgeDirection::Top {
-                    y_value = map_size.y - 1
-                }
+                    for i in 0..map_size.0 {
+                        self.ground_layer
+                            .set_tile_type_at(i, y_value, replacement_tile.clone());
+                    }
+                } else if direction == EdgeDirection::Left || direction == EdgeDirection::Right {
+                    let mut x_value = 0;
+                    if direction == EdgeDirection::Right {
+                        x_value = map_size.1 - 1
+                    }
 
-                for i in 0..map_size.x {
-                    self.map_in_progress.set_ground_type_at(
-                        i as usize,
-                        y_value as usize,
-                        replacement_tile.unwrap().clone(),
-                    );
-                }
-            } else if direction == EdgeDirection::Left || direction == EdgeDirection::Right {
-                let mut x_value = 0;
-                if direction == EdgeDirection::Right {
-                    x_value = map_size.y - 1
-                }
-
-                for j in 0..map_size.y {
-                    self.map_in_progress.set_ground_type_at(
-                        x_value as usize,
-                        j as usize,
-                        replacement_tile.unwrap().clone(),
-                    );
+                    for j in 0..map_size.1 {
+                        self.ground_layer
+                            .set_tile_type_at(x_value, j, replacement_tile.clone());
+                    }
                 }
             }
         }
     }
 
+    /// Generate another set of base tiles, on top of the initial one, based on noise generation
+    /// and a cellular automata model.
+    pub fn generate_variegated_base(&mut self, tile_type: GroundTileType) -> Self {
+        let map_size = self.ground_layer.get_size();
+
+        let map = MapgenMapBuilder::new(map_size.0, map_size.1)
+            .with(NoiseGenerator::new(0.70))
+            .with(CellularAutomata::new())
+            .with(AreaStartingPosition::new(XStart::CENTER, YStart::CENTER))
+            .build();
+
+        for i in 0..map_size.0 {
+            for j in 0..map_size.1 {
+                let single_index = (j * map_size.0) + i;
+                if map.tiles[single_index as usize] == TileType::Floor {
+                    self.ground_layer.set_tile_type_at(i, j, tile_type.clone());
+                }
+            }
+        }
+
+        self.clone()
+    }
+
+    /// Replace an inside top-left corner of one tile type with another tile type.
+    ///
+    /// An "inside top left" corner is defined as a tile at (x, y) with a defined type where the
+    /// next right-most tile (x+1, y) is of the same type, as is the tile just beneath it (x, y-1),
+    /// but where the tile diagonally down and to the right (x+1, y-1) is of a different type.
+    ///
+    /// NOTE: This algorithm is correct, BUT we actually want to draw ON TOP OF the existing tile in
+    ///       that's diagonally adjacent.
+    // pub fn replace_inside_top_left_corners(
+    //     &mut self,
+    //     base_tile_type: GroundTileType,
+    //     inside_corner_type: GroundTileType,
+    // ) -> Self {
+    //     let map_size = self.ground_layer.get_map_size();
+
+    //     for i in 0..map_size.x - 1 {
+    //         for j in 0..map_size.y - 1 {
+    //             if self
+    //                 .ground_layer
+    //                 .get_ground_type_at(i as usize, j as usize)
+    //                 .unwrap()
+    //                 != base_tile_type
+    //             {
+    //                 continue;
+    //             }
+
+    //             let next_right_tile = self
+    //                 .ground_layer
+    //                 .get_ground_type_at((i + 1) as usize, j as usize);
+    //             let next_bottom_tile = self
+    //                 .ground_layer
+    //                 .get_ground_type_at(i as usize, (j + 1) as usize);
+    //             let next_diagonally_bottom_right_tile = self
+    //                 .ground_layer
+    //                 .get_ground_type_at((i + 1) as usize, (j - 1) as usize);
+
+    //             // Bail if any of them are none.
+    //             if next_right_tile.is_none()
+    //                 || next_bottom_tile.is_none()
+    //                 || next_diagonally_bottom_right_tile.is_none()
+    //             {
+    //                 continue;
+    //             }
+
+    //             if next_right_tile.unwrap() == base_tile_type
+    //                 && next_bottom_tile.unwrap() == base_tile_type
+    //                 && next_diagonally_bottom_right_tile.unwrap() != base_tile_type
+    //             {
+    //                 self.ground_layer.set_ground_type_at(
+    //                     i as usize,
+    //                     j as usize,
+    //                     inside_corner_type.clone(),
+    //                 );
+    //             }
+    //         }
+    //     }
+
+    //     self.clone()
+    // }
+
     fn replace_tiles_in_corners_of_map(&mut self) {
-        let map_size = self.map_in_progress.get_map_size();
-        let base_tile_type = self.map_in_progress.get_default_ground_tile();
-        let top_left = self
-            .edge_map
-            .get(&(base_tile_type.clone(), EdgeDirection::TopLeft));
-        if top_left.is_some() {
-            let tile_type = top_left.unwrap();
-            self.map_in_progress.set_ground_type_at(
-                0 as usize,
-                (map_size.y - 1) as usize,
-                tile_type.clone(),
-            );
-        }
+        let map_size = self.ground_layer.get_size();
+        if let Some(base_tile_type) = self.ground_layer.get_default_tile_type() {
+            let top_left = self
+                .edge_map
+                .get(&(base_tile_type.clone(), EdgeDirection::OutsideTopLeft));
+            if top_left.is_some() {
+                let tile_type = top_left.unwrap();
+                self.ground_layer
+                    .set_tile_type_at(0, map_size.1 - 1, tile_type.clone());
+            }
 
-        let top_right = self
-            .edge_map
-            .get(&(base_tile_type.clone(), EdgeDirection::TopRight));
-        if top_right.is_some() {
-            let tile_type = top_right.unwrap();
-            self.map_in_progress.set_ground_type_at(
-                (map_size.x - 1) as usize,
-                (map_size.y - 1) as usize,
-                tile_type.clone(),
-            );
-        }
+            let top_right = self
+                .edge_map
+                .get(&(base_tile_type.clone(), EdgeDirection::OutsideTopRight));
+            if top_right.is_some() {
+                let tile_type = top_right.unwrap();
+                self.ground_layer.set_tile_type_at(
+                    map_size.0 - 1,
+                    map_size.1 - 1,
+                    tile_type.clone(),
+                );
+            }
 
-        let bottom_left = self
-            .edge_map
-            .get(&(base_tile_type.clone(), EdgeDirection::BottomLeft));
-        if bottom_left.is_some() {
-            let tile_type = bottom_left.unwrap();
-            self.map_in_progress
-                .set_ground_type_at(0 as usize, 0 as usize, tile_type.clone());
-        }
+            let bottom_left = self
+                .edge_map
+                .get(&(base_tile_type.clone(), EdgeDirection::OutsideBottomLeft));
+            if bottom_left.is_some() {
+                let tile_type = bottom_left.unwrap();
+                self.ground_layer.set_tile_type_at(0, 0, tile_type.clone());
+            }
 
-        let bottom_right = self
-            .edge_map
-            .get(&(base_tile_type.clone(), EdgeDirection::BottomRight));
-        if bottom_right.is_some() {
-            let tile_type = bottom_right.unwrap();
-            self.map_in_progress.set_ground_type_at(
-                (map_size.x - 1) as usize,
-                0 as usize,
-                tile_type.clone(),
-            );
+            let bottom_right = self
+                .edge_map
+                .get(&(base_tile_type.clone(), EdgeDirection::OutsideBottomRight));
+            if bottom_right.is_some() {
+                let tile_type = bottom_right.unwrap();
+                self.ground_layer
+                    .set_tile_type_at(map_size.0 - 1, 0, tile_type.clone());
+            }
         }
     }
 
-    pub fn build(&self) -> Map {
-        self.map_in_progress.clone()
+    pub fn build(&self) -> Vec<Layer> {
+        vec![self.ground_layer.clone()]
     }
 }
