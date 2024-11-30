@@ -1,3 +1,4 @@
+pub mod camera;
 pub mod input;
 pub mod layer;
-pub mod map;
+pub mod player_character;

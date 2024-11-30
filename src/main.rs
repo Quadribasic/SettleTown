@@ -4,22 +4,16 @@ use bevy::{
     prelude::*,
 };
 
-mod app;
 mod components;
 mod plugins;
 mod resources;
+mod systems;
 
 // use bevy_tiles::{commands::TileCommandExt, coords::CoordIterator, tiles_2d::*, TilesPlugin};
 use plugins::{
-    input::SettleTownInputPlugin,
-    layer::{EdgeDirection, GroundTileType},
-    map::{MapBuilder, SettleTownMapPlugin},
+    camera::SettleTownCameraPlugin, input::SettleTownInputPlugin, layer::SettleTownLayerPlugin,
+    player_character::SettleTownPlayerCharacterPlugin,
 };
-
-use app::insert_resources::MultiResourceInsertion;
-
-// use components::world_position::WorldPosition;
-// use resources::map::Map;
 
 const WINDOW_WIDTH: i32 = 1408;
 const WINDOW_HEIGHT: i32 = 768;
@@ -55,98 +49,10 @@ fn main() {
             LogDiagnosticsPlugin::default(),
             FrameTimeDiagnosticsPlugin,
         ))
+        .add_plugins(SettleTownCameraPlugin)
+        .add_plugins(SettleTownLayerPlugin::new(320, 320))
+        .add_plugins(SettleTownPlayerCharacterPlugin)
         .add_plugins(SettleTownInputPlugin)
-        .add_plugins(SettleTownMapPlugin)
-        .insert_resources(
-            MapBuilder::new(320, 320, GroundTileType::Grass)
-                .add_edges_and_corner_tiles_for_base_tile(
-                    GroundTileType::Grass,
-                    vec![
-                        (
-                            EdgeDirection::OutsideTopLeft,
-                            GroundTileType::GrassEdgeOutsideTopLeft,
-                        ),
-                        (EdgeDirection::Top, GroundTileType::GrassEdgeTop),
-                        (
-                            EdgeDirection::OutsideTopRight,
-                            GroundTileType::GrassEdgeOutsideTopRight,
-                        ),
-                        (EdgeDirection::Right, GroundTileType::GrassEdgeRight),
-                        (
-                            EdgeDirection::OutsideBottomRight,
-                            GroundTileType::GrassEdgeOutsideBottomRight,
-                        ),
-                        (EdgeDirection::Bottom, GroundTileType::GrassEdgeBottom),
-                        (
-                            EdgeDirection::OutsideBottomLeft,
-                            GroundTileType::GrassEdgeOutsideBottomLeft,
-                        ),
-                        (EdgeDirection::Left, GroundTileType::GrassEdgeLeft),
-                    ],
-                )
-                // .add_edges_and_corner_tiles_for_base_tile(
-                //     GroundTileType::RockyDirt,
-                //     vec![
-                //         (
-                //             EdgeDirection::OutsideTopLeft,
-                //             GroundTileType::RockyDirtEdgeOutsideTopLeft,
-                //         ),
-                //         (EdgeDirection::Top, GroundTileType::RockyDirtEdgeTop),
-                //         (
-                //             EdgeDirection::OutsideTopRight,
-                //             GroundTileType::RockyDirtEdgeOutsideTopRight,
-                //         ),
-                //         (EdgeDirection::Right, GroundTileType::RockyDirtEdgeRight),
-                //         (
-                //             EdgeDirection::OutsideBottomRight,
-                //             GroundTileType::RockyDirtEdgeOutsideBottomRight,
-                //         ),
-                //         (EdgeDirection::Bottom, GroundTileType::RockyDirtEdgeBottom),
-                //         (
-                //             EdgeDirection::OutsideBottomLeft,
-                //             GroundTileType::RockyDirtEdgeOutsideBottomLeft,
-                //         ),
-                //         (EdgeDirection::Left, GroundTileType::RockyDirtEdgeLeft),
-                //     ],
-                // )
-                .generate_variegated_base(GroundTileType::RockyDirt)
-                // .replace_inside_top_left_corners(
-                //     GroundTileType::Grass,
-                //     GroundTileType::GrassEdgeInsideCornerTopLeft,
-                // )
-                // Add alternatives last to simplify processing of tiles.
-                .add_alternative_for(
-                    GroundTileType::Grass,
-                    GroundTileType::GrassAlternate1,
-                    0.033,
-                )
-                .add_alternative_for(
-                    GroundTileType::Grass,
-                    GroundTileType::GrassAlternate2,
-                    0.033,
-                )
-                .add_alternative_for(
-                    GroundTileType::Grass,
-                    GroundTileType::GrassAlternate3,
-                    0.033,
-                )
-                .add_alternative_for(
-                    GroundTileType::RockyDirt,
-                    GroundTileType::RockyDirtAlternate1,
-                    0.033,
-                )
-                .add_alternative_for(
-                    GroundTileType::RockyDirt,
-                    GroundTileType::RockyDirtAlternate2,
-                    0.033,
-                )
-                .add_alternative_for(
-                    GroundTileType::RockyDirt,
-                    GroundTileType::RockyDirtAlternate3,
-                    0.033,
-                )
-                .build(),
-        )
         .add_systems(
             Update,
             (
