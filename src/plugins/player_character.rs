@@ -1,20 +1,47 @@
+// use bevy::{
+//     app::{Plugin, Startup},
+//     asset::{AssetServer, Assets, Handle},
+//     log::info,
+//     math::{UVec2, Vec3},
+//     prelude::{Commands, Component, Image, Res, ResMut, Transform},
+//     sprite::{TextureAtlas, TextureAtlasLayout},
+//     utils::default,
+// };
+
+use std::time::Duration;
+
 use bevy::{
     app::{Plugin, Startup},
     asset::{AssetServer, Assets, Handle},
     log::info,
     math::{UVec2, Vec3},
     prelude::{Commands, Component, Image, Res, ResMut, Transform},
-    sprite::{SpriteBundle, TextureAtlas, TextureAtlasBuilder, TextureAtlasLayout},
+    sprite::{TextureAtlas, TextureAtlasLayout},
+    time::{Timer, TimerMode},
     utils::default,
 };
 
-use crate::components::sprites::{Direction, DirectionalSpriteBundle};
+use crate::components::sprites::DirectionalSpriteBundle;
 
 pub struct SettleTownPlayerCharacterPlugin;
 
 impl Plugin for SettleTownPlayerCharacterPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_systems(Startup, spawn_player_character_entity);
+    }
+}
+
+#[derive(Component)]
+pub struct AnimationConfig {
+    pub first_sprite_index: usize,
+    pub last_sprite_index: usize,
+    pub fps: u8,
+    pub frame_timer: Timer,
+}
+
+impl AnimationConfig {
+    pub fn timer_from_fps(fps: u8) -> Timer {
+        Timer::new(Duration::from_secs_f32(1.0 / (fps as f32)), TimerMode::Once)
     }
 }
 

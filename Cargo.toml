@@ -7,8 +7,9 @@ edition = "2021"
 resolver = "2"
 
 [dependencies]
-bevy = "0.14.0"
-# bevy = { git = "https://github.com/bevyengine/bevy", branch = "release-0.15.0" }
+bevy = "0.14.2"
+bevy-inspector-egui = "0.27.0"
+# bevy_animations = "0.7.0"
 bevy_ecs_tilemap = "0.14.0"
 dyn-clone = "1.0.17"
 mapgen = "0.4"
