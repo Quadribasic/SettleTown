@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use bevy::{
     app::{Plugin, Startup},
     asset::AssetServer,
-    log::info,
     prelude::{Commands, Res, Resource},
 };
 use bevy_ecs_tilemap::{
@@ -12,12 +11,14 @@ use bevy_ecs_tilemap::{
     tiles::{TileBundle, TilePos, TileStorage, TileTextureIndex},
     TilemapBundle, TilemapPlugin,
 };
-use mapgen::{
-    AreaStartingPosition, CellularAutomata, CullUnreachable, DrunkardsWalk,
-    MapBuilder as MapgenMapBuilder, NoiseGenerator, TileType, XStart, YStart,
-};
+use mapgen::{DrunkardsWalk, MapBuilder as MapgenMapBuilder, TileType};
 use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
+
+use crate::resources::world::WorldCoordinates;
+
+const TILE_MAP_TILE_WIDTH: f32 = 32.0;
+const TILE_MAP_TILE_HEIGHT: f32 = 32.0;
 
 pub struct SettleTownLayerPlugin {
     layer_width: usize,
@@ -112,6 +113,12 @@ impl Plugin for SettleTownLayerPlugin {
         );
         app.add_plugins(TilemapPlugin);
         app.insert_resource(layer_stack);
+        app.insert_resource(WorldCoordinates::new(
+            TILE_MAP_TILE_WIDTH,
+            TILE_MAP_TILE_HEIGHT,
+            self.layer_width,
+            self.layer_height,
+        ));
         app.add_systems(Startup, setup_rendering_of_layers);
     }
 }
@@ -121,7 +128,7 @@ fn setup_rendering_of_layers(
     asset_server: Res<AssetServer>,
     layer_stack: Res<LayerStack>,
 ) {
-    info!("There are {} layers!", layer_stack.get_num_layers());
+    // info!("There are {} layers!", layer_stack.get_num_layers());
     for layer_num in 0..layer_stack.get_num_layers() {
         let layer = layer_stack.get_layer_at_level(layer_num).unwrap();
         let map_size = layer.get_size();
@@ -154,7 +161,10 @@ fn setup_rendering_of_layers(
             }
         }
 
-        let tile_size = TilemapTileSize { x: 32.0, y: 32.0 };
+        let tile_size = TilemapTileSize {
+            x: TILE_MAP_TILE_WIDTH,
+            y: TILE_MAP_TILE_HEIGHT,
+        };
         let grid_size = tile_size.into();
         let map_type = TilemapType::default();
 
@@ -173,7 +183,6 @@ fn setup_rendering_of_layers(
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum EdgeDirection {
-    OutsideTopLeft,
     Top,
     OutsideTopRight,
     Right,
@@ -181,6 +190,7 @@ pub enum EdgeDirection {
     Bottom,
     OutsideBottomLeft,
     Left,
+    OutsideTopLeft,
 }
 
 #[derive(Clone, Deserialize, Eq, Hash, PartialEq, Serialize)]
@@ -305,9 +315,9 @@ impl LayerStack {
         Self { stack: vec![] }
     }
 
-    pub fn add_layer(&mut self, to_add: Layer) {
-        self.stack.push(to_add);
-    }
+    // pub fn add_layer(&mut self, to_add: Layer) {
+    //     self.stack.push(to_add);
+    // }
 
     pub fn add_layers(&mut self, to_add: Vec<Layer>) {
         for layer in to_add {
@@ -418,52 +428,52 @@ impl GroundLayerBuilder {
         self.replace_tiles_in_corners_of_map();
     }
 
-    fn decorate_edge_tiles_differing_from_base(
-        &mut self,
-        base_tile: GroundTileType,
-        replacement_tiles: (
-            // Top
-            GroundTileType,
-            // Right
-            GroundTileType,
-            // Bottom
-            GroundTileType,
-            // Left
-            GroundTileType,
-        ),
-    ) -> Self {
-        let (width, height) = self.ground_layer.get_size();
-        for i in 1..width - 1 {
-            for j in 1..height - 1 {
-                // If i, j is our base tile and the tile below us (i, j-1) is something else
-                // then add a decorator (bottom) to the top of the tile below us.
-                if let Some(current_tile) = self.ground_layer.get_tile_type_at(i, j) {
-                    if let Some(tile_below) = self.ground_layer.get_tile_type_at(i, j - 1) {
-                        if current_tile == base_tile && current_tile != tile_below {
-                            // info!("Setting ground decoration layer for bottom tile!");
-                            self.ground_decoration_layer.set_tile_type_at(
-                                i,
-                                j - 1,
-                                replacement_tiles.2.clone(),
-                            );
-                        }
-                    }
+    // fn decorate_edge_tiles_differing_from_base(
+    //     &mut self,
+    //     base_tile: GroundTileType,
+    //     replacement_tiles: (
+    //         // Top
+    //         GroundTileType,
+    //         // Right
+    //         GroundTileType,
+    //         // Bottom
+    //         GroundTileType,
+    //         // Left
+    //         GroundTileType,
+    //     ),
+    // ) -> Self {
+    //     let (width, height) = self.ground_layer.get_size();
+    //     for i in 1..width - 1 {
+    //         for j in 1..height - 1 {
+    //             // If i, j is our base tile and the tile below us (i, j-1) is something else
+    //             // then add a decorator (bottom) to the top of the tile below us.
+    //             if let Some(current_tile) = self.ground_layer.get_tile_type_at(i, j) {
+    //                 if let Some(tile_below) = self.ground_layer.get_tile_type_at(i, j - 1) {
+    //                     if current_tile == base_tile && current_tile != tile_below {
+    //                         // info!("Setting ground decoration layer for bottom tile!");
+    //                         self.ground_decoration_layer.set_tile_type_at(
+    //                             i,
+    //                             j - 1,
+    //                             replacement_tiles.2.clone(),
+    //                         );
+    //                     }
+    //                 }
 
-                    if let Some(tile_right) = self.ground_layer.get_tile_type_at(i + 1, j) {
-                        if current_tile == base_tile && current_tile != tile_right {
-                            self.ground_decoration_layer.set_tile_type_at(
-                                i + 1,
-                                j,
-                                replacement_tiles.1.clone(),
-                            );
-                        }
-                    }
-                }
-            }
-        }
+    //                 if let Some(tile_right) = self.ground_layer.get_tile_type_at(i + 1, j) {
+    //                     if current_tile == base_tile && current_tile != tile_right {
+    //                         self.ground_decoration_layer.set_tile_type_at(
+    //                             i + 1,
+    //                             j,
+    //                             replacement_tiles.1.clone(),
+    //                         );
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
 
-        self.clone()
-    }
+    //     self.clone()
+    // }
 
     fn replace_tiles_along_edge(&mut self, direction: EdgeDirection) {
         let map_size = self.ground_layer.get_size();
@@ -575,48 +585,48 @@ impl GroundLayerBuilder {
     ///
     /// NOTE: This algorithm is correct, BUT we actually want to draw ON TOP OF the existing tile in
     ///       that's diagonally adjacent.
-    pub fn replace_inside_top_left_corners(
-        &mut self,
-        base_tile_type: GroundTileType,
-        inside_corner_type: GroundTileType,
-    ) -> Self {
-        let map_size = self.ground_layer.get_size();
+    // pub fn replace_inside_top_left_corners(
+    //     &mut self,
+    //     base_tile_type: GroundTileType,
+    //     inside_corner_type: GroundTileType,
+    // ) -> Self {
+    //     let map_size = self.ground_layer.get_size();
 
-        for i in 0..map_size.0 - 1 {
-            for j in 0..map_size.1 - 1 {
-                if self.ground_layer.get_tile_type_at(i, j).unwrap() != base_tile_type {
-                    continue;
-                }
+    //     for i in 0..map_size.0 - 1 {
+    //         for j in 0..map_size.1 - 1 {
+    //             if self.ground_layer.get_tile_type_at(i, j).unwrap() != base_tile_type {
+    //                 continue;
+    //             }
 
-                let next_right_tile = self.ground_layer.get_tile_type_at(i + 1, j);
-                let next_bottom_tile = self.ground_layer.get_tile_type_at(i, j + 1);
-                let next_diagonally_bottom_right_tile =
-                    self.ground_layer.get_tile_type_at(i + 1, j - 1);
+    //             let next_right_tile = self.ground_layer.get_tile_type_at(i + 1, j);
+    //             let next_bottom_tile = self.ground_layer.get_tile_type_at(i, j + 1);
+    //             let next_diagonally_bottom_right_tile =
+    //                 self.ground_layer.get_tile_type_at(i + 1, j - 1);
 
-                // Bail if any of them are none.
-                if next_right_tile.is_none()
-                    || next_bottom_tile.is_none()
-                    || next_diagonally_bottom_right_tile.is_none()
-                {
-                    continue;
-                }
+    //             // Bail if any of them are none.
+    //             if next_right_tile.is_none()
+    //                 || next_bottom_tile.is_none()
+    //                 || next_diagonally_bottom_right_tile.is_none()
+    //             {
+    //                 continue;
+    //             }
 
-                if next_right_tile.unwrap() != base_tile_type
-                    && next_bottom_tile.unwrap() == base_tile_type
-                    && next_diagonally_bottom_right_tile.unwrap() != base_tile_type
-                {
-                    // info!("Adding inside corner to ground decoration layer!");
-                    self.ground_decoration_layer.set_tile_type_at(
-                        i + 1,
-                        j - 1,
-                        inside_corner_type.clone(),
-                    );
-                }
-            }
-        }
+    //             if next_right_tile.unwrap() != base_tile_type
+    //                 && next_bottom_tile.unwrap() == base_tile_type
+    //                 && next_diagonally_bottom_right_tile.unwrap() != base_tile_type
+    //             {
+    //                 // info!("Adding inside corner to ground decoration layer!");
+    //                 self.ground_decoration_layer.set_tile_type_at(
+    //                     i + 1,
+    //                     j - 1,
+    //                     inside_corner_type.clone(),
+    //                 );
+    //             }
+    //         }
+    //     }
 
-        self.clone()
-    }
+    //     self.clone()
+    // }
 
     pub fn build(&self) -> Vec<Layer> {
         vec![
