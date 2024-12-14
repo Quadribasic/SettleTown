@@ -12,7 +12,7 @@ fn keyboard_input_system(
     // commands: Commands,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut query_camera: Query<
-        (&mut Camera, &mut Transform),
+        (&mut Camera, &mut Transform, &GlobalTransform),
         (With<OverheadMapCamera>, Without<PlayerCharacter>),
     >,
     mut query_player_character: Query<
@@ -38,6 +38,7 @@ fn keyboard_input_system(
     }
 
     let mut player_char = query_player_character.single_mut();
+    let player_char_original_pos = player_char.1.translation.clone();
 
     // Update the player character's facing direction and the position of the
     // player character.
@@ -111,6 +112,37 @@ fn keyboard_input_system(
 
     let viewport_half_width = viewport_size.width / 2.0;
     let viewport_half_height = viewport_size.height / 2.0;
+
+    // If the player is moving _towards_ the center of the viewport, then we don't want to
+    // move the camera.
+    let viewport_center_world = camera
+        .0
+        .ndc_to_world(camera.2, Vec3::new(0.0, 0.0, 0.0))
+        .unwrap();
+
+    let distance_to_center_before_move = (player_char_original_pos - viewport_center_world).abs();
+    let distance_to_center_after_move = (player_char.1.translation - viewport_center_world).abs();
+
+    if distance_to_center_before_move.x > distance_to_center_after_move.x {
+        horizontal_camera_movement = 0.0;
+    }
+
+    if distance_to_center_before_move.y > distance_to_center_after_move.y {
+        vertical_camera_movement = 0.0;
+    }
+
+    info!(
+        "Distance to camera center before move: {:?}",
+        distance_to_center_before_move
+    );
+    info!(
+        "Distance to camera center after move: {:?}",
+        distance_to_center_after_move
+    );
+    info!(
+        "Viewport center (in world coords): ({:?}, {:?})",
+        viewport_center_world.x, viewport_center_world.y
+    );
 
     camera.1.translation = Vec3::new(
         f32::max(
