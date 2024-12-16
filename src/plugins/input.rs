@@ -2,9 +2,14 @@ use bevy::prelude::*;
 
 use super::{
     camera::{OverheadMapCamera, ViewportWorldSize},
-    player_character::PlayerCharacter,
+    player_character::{
+        AnimationConfig, PlayerCharacter, PLAYER_CHARACTER_RUN_FPS, PLAYER_CHARACTER_WALK_FPS,
+    },
 };
-use crate::{components::sprites::Direction, resources::world::WorldCoordinates};
+use crate::{
+    components::sprites::Direction, execute_animations_indefinite,
+    resources::world::WorldCoordinates,
+};
 
 const PLAYER_MOVEMENT_SPEED: f32 = 1.0;
 
@@ -16,14 +21,18 @@ fn keyboard_input_system(
         (With<OverheadMapCamera>, Without<PlayerCharacter>),
     >,
     mut query_player_character: Query<
-        (&mut Direction, &mut Transform, &mut TextureAtlas),
+        (
+            &mut Direction,
+            &mut Transform,
+            &mut TextureAtlas,
+            &mut AnimationConfig,
+        ),
         With<PlayerCharacter>,
     >,
     world_coords: Res<WorldCoordinates>,
     viewport_size: Res<ViewportWorldSize>,
 ) {
     if keyboard_input.pressed(KeyCode::KeyQ) {
-        info!("User requested quitting the application from the keyboard");
         std::process::exit(0);
     }
 
@@ -32,12 +41,16 @@ fn keyboard_input_system(
 
     let mut shift_multiplier = 1.0;
 
+    let mut player_char = query_player_character.single_mut();
+
     // If we have the SHIFT key pressed, then we'll increase the rate of transition rate.
     if keyboard_input.pressed(KeyCode::ShiftLeft) || keyboard_input.pressed(KeyCode::ShiftRight) {
         shift_multiplier = 10.0;
+        player_char.3.fps = PLAYER_CHARACTER_RUN_FPS;
+    } else {
+        player_char.3.fps = PLAYER_CHARACTER_WALK_FPS;
     }
 
-    let mut player_char = query_player_character.single_mut();
     let player_char_original_pos = player_char.1.translation.clone();
 
     // Update the player character's facing direction and the position of the
@@ -100,8 +113,16 @@ fn keyboard_input_system(
     //     player_char.1.translation.x, player_char.1.translation.y
     // );
 
-    // Also update the texture atlas index
-    player_char.2.index = (player_char.0.clone() as usize) * 9;
+    if keyboard_input.just_released(KeyCode::ArrowRight) {
+        // Stop the player character's walking animation and reset it to the appropriate frame.
+        player_char.3.should_run = false;
+        player_char.2.index = player_char.3.first_sprite_index;
+    }
+
+    // Also update the animation for the direction the player is facing
+    // player_char.2.index = (player_char.0.clone() as usize) * 9;
+    // player_char.3.first_sprite_index = (player_char.0.clone() as usize) * 9;
+    // player_char.3.last_sprite_index = player_char.3.first_sprite_index + 8;
 
     // Update the camera
 
@@ -131,18 +152,18 @@ fn keyboard_input_system(
         vertical_camera_movement = 0.0;
     }
 
-    info!(
-        "Distance to camera center before move: {:?}",
-        distance_to_center_before_move
-    );
-    info!(
-        "Distance to camera center after move: {:?}",
-        distance_to_center_after_move
-    );
-    info!(
-        "Viewport center (in world coords): ({:?}, {:?})",
-        viewport_center_world.x, viewport_center_world.y
-    );
+    // info!(
+    //     "Distance to camera center before move: {:?}",
+    //     distance_to_center_before_move
+    // );
+    // info!(
+    //     "Distance to camera center after move: {:?}",
+    //     distance_to_center_after_move
+    // );
+    // info!(
+    //     "Viewport center (in world coords): ({:?}, {:?})",
+    //     viewport_center_world.x, viewport_center_world.y
+    // );
 
     camera.1.translation = Vec3::new(
         f32::max(
@@ -167,6 +188,9 @@ pub struct SettleTownInputPlugin;
 
 impl Plugin for SettleTownInputPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, keyboard_input_system);
+        app.add_systems(
+            Update,
+            keyboard_input_system.before(execute_animations_indefinite),
+        );
     }
 }

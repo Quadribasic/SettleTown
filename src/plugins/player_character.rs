@@ -1,13 +1,3 @@
-// use bevy::{
-//     app::{Plugin, Startup},
-//     asset::{AssetServer, Assets, Handle},
-//     log::info,
-//     math::{UVec2, Vec3},
-//     prelude::{Commands, Component, Image, Res, ResMut, Transform},
-//     sprite::{TextureAtlas, TextureAtlasLayout},
-//     utils::default,
-// };
-
 use std::time::Duration;
 
 use bevy::{
@@ -23,6 +13,9 @@ use bevy::{
 
 use crate::components::sprites::DirectionalSpriteBundle;
 
+pub const PLAYER_CHARACTER_WALK_FPS: u8 = 10;
+pub const PLAYER_CHARACTER_RUN_FPS: u8 = 100;
+
 pub struct SettleTownPlayerCharacterPlugin;
 
 impl Plugin for SettleTownPlayerCharacterPlugin {
@@ -31,21 +24,34 @@ impl Plugin for SettleTownPlayerCharacterPlugin {
     }
 }
 
-#[derive(Component)]
+// XXX_jwir3: We should probably externalize this, as it's not going to be limited to _only_ the
+//            player character, but rather all sprites.
+#[derive(Component, Debug)]
 pub struct AnimationConfig {
     pub first_sprite_index: usize,
     pub last_sprite_index: usize,
     pub fps: u8,
     pub frame_timer: Timer,
+    pub should_run: bool,
 }
 
 impl AnimationConfig {
+    pub fn new(first_frame: usize, last_frame: usize, fps: u8) -> Self {
+        Self {
+            first_sprite_index: first_frame,
+            last_sprite_index: last_frame,
+            fps: fps,
+            frame_timer: Self::timer_from_fps(fps),
+            should_run: false,
+        }
+    }
+
     pub fn timer_from_fps(fps: u8) -> Timer {
         Timer::new(Duration::from_secs_f32(1.0 / (fps as f32)), TimerMode::Once)
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub struct PlayerCharacter;
 
 fn spawn_player_character_entity(
@@ -62,18 +68,28 @@ fn spawn_player_character_entity(
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
     let player_character_sprite = DirectionalSpriteBundle {
         transform: Transform::from_scale(Vec3::splat(1.0))
-            .with_translation(Vec3::new(0.0, 0.0, 2.0)),
+            .with_translation(Vec3::new(0.0, 0.0, 1.0)),
         texture: walkcycle_image,
         ..default()
     };
-    commands.spawn((
+
+    // There are 9 frames to each walkcycle animation.
+    let pc_animation = AnimationConfig::new(
+        (player_character_sprite.facing.clone() as usize) * 9,
+        ((player_character_sprite.facing.clone() as usize) * 9) + 8,
+        PLAYER_CHARACTER_WALK_FPS,
+    );
+
+    let bundle = (
         PlayerCharacter,
         player_character_sprite.clone(),
         TextureAtlas {
             layout: texture_atlas_layout.clone(),
-            index: (player_character_sprite.facing as usize) * 9,
+            index: pc_animation.first_sprite_index,
         },
-    ));
+        pc_animation,
+    );
 
-    info!("Finished spawning player character entity");
+    info!("Finished spawning player character entity: {:?}", &bundle);
+    commands.spawn(bundle);
 }
