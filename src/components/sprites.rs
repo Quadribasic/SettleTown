@@ -27,7 +27,10 @@ impl Default for Direction {
     }
 }
 
-#[derive(Bundle, Clone, Default)]
+/// Specifies the direction an entity is facing (given that the entity _can_ face more than one
+/// direction). This is designed for the player character and NPCs, but can be used for any sprites
+/// that have multiple directions it can face.
+#[derive(Bundle, Clone, Debug, Default)]
 pub struct DirectionalSpriteBundle {
     /// Specifies the rendering properties of the sprite, such as color tint and flip.
     pub sprite: Sprite,
