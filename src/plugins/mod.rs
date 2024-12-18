@@ -1,4 +1,5 @@
 pub mod aabb_renderer;
+pub mod animation;
 pub mod camera;
 pub mod input;
 pub mod layer;

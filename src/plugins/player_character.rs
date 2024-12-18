@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use bevy::{
     app::{Plugin, Startup},
     asset::{AssetServer, Assets, Handle},
@@ -7,11 +5,13 @@ use bevy::{
     math::{UVec2, Vec3},
     prelude::{Commands, Component, Image, Res, ResMut, Transform},
     sprite::{TextureAtlas, TextureAtlasLayout},
-    time::{Timer, TimerMode},
     utils::default,
 };
 
-use crate::components::sprites::DirectionalSpriteBundle;
+use crate::{
+    components::sprites::{DirectionalSprite, DirectionalSpriteBundle},
+    plugins::animation::AnimationConfig,
+};
 
 pub const PLAYER_CHARACTER_WALK_FPS: u8 = 10;
 pub const PLAYER_CHARACTER_RUN_FPS: u8 = 100;
@@ -21,33 +21,6 @@ pub struct SettleTownPlayerCharacterPlugin;
 impl Plugin for SettleTownPlayerCharacterPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_systems(Startup, spawn_player_character_entity);
-    }
-}
-
-// XXX_jwir3: We should probably externalize this, as it's not going to be limited to _only_ the
-//            player character, but rather all sprites.
-#[derive(Component, Debug)]
-pub struct AnimationConfig {
-    pub first_sprite_index: usize,
-    pub last_sprite_index: usize,
-    pub fps: u8,
-    pub frame_timer: Timer,
-    pub should_run: bool,
-}
-
-impl AnimationConfig {
-    pub fn new(first_frame: usize, last_frame: usize, fps: u8) -> Self {
-        Self {
-            first_sprite_index: first_frame,
-            last_sprite_index: last_frame,
-            fps: fps,
-            frame_timer: Self::timer_from_fps(fps),
-            should_run: false,
-        }
-    }
-
-    pub fn timer_from_fps(fps: u8) -> Timer {
-        Timer::new(Duration::from_secs_f32(1.0 / (fps as f32)), TimerMode::Once)
     }
 }
 
@@ -62,7 +35,7 @@ fn spawn_player_character_entity(
     info!("Spawning player character entity");
     // Load the necessary texture from a file for the player character
     let walkcycle_image: Handle<Image> =
-        asset_server.load("dummy-lpc/sprites/people/male_walkcycle.png");
+        asset_server.load("dummy-lpc/sprites/people/female_walkcycle.png");
     // the sprite sheet has 9 sprites arranged in four rows, and they are all 64x64 pixels
     let layout = TextureAtlasLayout::from_grid(UVec2::splat(64), 9, 4, None, None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
@@ -88,6 +61,7 @@ fn spawn_player_character_entity(
             index: pc_animation.first_sprite_index,
         },
         pc_animation,
+        DirectionalSprite,
     );
 
     info!("Finished spawning player character entity: {:?}", &bundle);

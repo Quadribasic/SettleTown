@@ -49,3 +49,7 @@ pub struct DirectionalSpriteBundle {
     /// The direction the sprite is facing
     pub facing: Direction,
 }
+
+/// Marker struct for any directional sprite.
+#[derive(Component, Debug)]
+pub struct DirectionalSprite;

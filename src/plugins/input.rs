@@ -1,20 +1,15 @@
 use bevy::prelude::*;
 
 use super::{
+    animation::{execute_animations_indefinite, AnimationConfig},
     camera::{OverheadMapCamera, ViewportWorldSize},
-    player_character::{
-        AnimationConfig, PlayerCharacter, PLAYER_CHARACTER_RUN_FPS, PLAYER_CHARACTER_WALK_FPS,
-    },
+    player_character::{PlayerCharacter, PLAYER_CHARACTER_RUN_FPS, PLAYER_CHARACTER_WALK_FPS},
 };
-use crate::{
-    components::sprites::Direction, execute_animations_indefinite,
-    resources::world::WorldCoordinates,
-};
+use crate::{components::sprites::Direction, resources::world::WorldCoordinates};
 
 const PLAYER_MOVEMENT_SPEED: f32 = 1.0;
 
 fn keyboard_input_system(
-    // commands: Commands,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut query_camera: Query<
         (&mut Camera, &mut Transform, &GlobalTransform),
@@ -113,7 +108,11 @@ fn keyboard_input_system(
     //     player_char.1.translation.x, player_char.1.translation.y
     // );
 
-    if keyboard_input.just_released(KeyCode::ArrowRight) {
+    if keyboard_input.just_released(KeyCode::ArrowRight)
+        || keyboard_input.just_released(KeyCode::ArrowLeft)
+        || keyboard_input.just_released(KeyCode::ArrowUp)
+        || keyboard_input.just_released(KeyCode::ArrowDown)
+    {
         // Stop the player character's walking animation and reset it to the appropriate frame.
         player_char.3.should_run = false;
         player_char.2.index = player_char.3.first_sprite_index;
