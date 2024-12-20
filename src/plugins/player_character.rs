@@ -77,7 +77,7 @@ fn spawn_player_character_entity(
     let texture_atlas_layout_hat = texture_atlas_layouts.add(TextureAtlasLayout::from_grid(
         UVec2::new(64, 25),
         1,
-        1,
+        4,
         None,
         None,
     ));

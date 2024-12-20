@@ -24,7 +24,7 @@ impl Into<usize> for Direction {
 
 impl Default for Direction {
     fn default() -> Self {
-        Direction::South
+        Direction::West
     }
 }
 
@@ -95,7 +95,7 @@ impl From<NonAnimatedApparel> for NonAnimatedApparelSpriteBundle {
             view_visibility: ViewVisibility::default(),
             atlas: TextureAtlas {
                 layout: value.texture_atlas_layout,
-                index: 0,
+                index: 3,
             },
         }
     }
@@ -118,13 +118,16 @@ impl From<&NonAnimatedApparel> for NonAnimatedApparelSpriteBundle {
             view_visibility: ViewVisibility::default(),
             atlas: TextureAtlas {
                 layout: value.texture_atlas_layout.clone(),
-                index: 0,
+                index: 3,
             },
         }
     }
 }
 
-#[derive(Component, Clone, Debug)]
+#[derive(Component)]
+pub struct Apparel;
+
+#[derive(Clone, Debug)]
 pub struct NonAnimatedApparel {
     /// The vertical and horizontal offset of the sprite from the center of the parent
     pub offset: Vec2,
@@ -156,7 +159,7 @@ impl NonAnimatedApparel {
     }
 
     pub fn spawn(&self, mut commands: Commands) {
-        let hat_bundle = NonAnimatedApparelSpriteBundle::from(self);
+        let hat_bundle = (Apparel, NonAnimatedApparelSpriteBundle::from(self));
         commands.spawn(hat_bundle).set_parent(self.parent_id);
     }
 }
