@@ -62,7 +62,7 @@ fn spawn_player_character_entity(
         },
         Transform::from_scale(Vec3::splat(1.0)).with_translation(Vec3::new(0.0, 0.0, 1.0)),
         walkcycle_image,
-        player_char_facing,
+        player_char_facing.clone(),
     );
 
     let bundle = (
@@ -88,6 +88,7 @@ fn spawn_player_character_entity(
         Vec2::new(0.0, 12.0),
         hat_image,
         texture_atlas_layout_hat,
+        player_char_facing,
     );
-    hat_apparel.spawn(commands);
+    hat_apparel.spawn(commands, texture_atlas_layouts);
 }

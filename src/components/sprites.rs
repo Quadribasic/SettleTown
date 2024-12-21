@@ -1,9 +1,9 @@
 use bevy::{
-    asset::Handle,
+    asset::{Assets, Handle},
     math::{Vec2, Vec3},
     prelude::{
         BuildChildren, Bundle, Commands, Component, Entity, GlobalTransform, Image,
-        InheritedVisibility, Transform, ViewVisibility, Visibility,
+        InheritedVisibility, Res, ResMut, Transform, ViewVisibility, Visibility,
     },
     sprite::{Sprite, TextureAtlas, TextureAtlasLayout},
 };
@@ -24,7 +24,7 @@ impl Into<usize> for Direction {
 
 impl Default for Direction {
     fn default() -> Self {
-        Direction::West
+        Direction::South
     }
 }
 
@@ -78,31 +78,16 @@ pub struct DirectionalSprite;
 /// only four different frames to the texture atlas: the four cardinal directions.
 pub type NonAnimatedApparelSpriteBundle = DirectionalSpriteBundle;
 
-impl From<NonAnimatedApparel> for NonAnimatedApparelSpriteBundle {
-    fn from(value: NonAnimatedApparel) -> Self {
-        Self {
-            sprite: Sprite::default(),
-            facing: Direction::default(),
-            texture: value.texture,
-            transform: Transform::from_scale(Vec3::splat(1.0)).with_translation(Vec3::new(
-                value.offset.x,
-                value.offset.y,
-                2.0,
-            )),
-            global_transform: GlobalTransform::default(),
-            visibility: Visibility::default(),
-            inherited_visibility: InheritedVisibility::default(),
-            view_visibility: ViewVisibility::default(),
-            atlas: TextureAtlas {
-                layout: value.texture_atlas_layout,
-                index: 3,
-            },
+impl NonAnimatedApparelSpriteBundle {
+    pub fn create(
+        value: &NonAnimatedApparel,
+        atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    ) -> Self {
+        let mut index: usize = 0;
+        if let Some(layout) = atlas_layouts.get(&value.texture_atlas_layout) {
+            index = (value.facing.clone() as usize) * (layout.size.y as usize)
         }
-    }
-}
 
-impl From<&NonAnimatedApparel> for NonAnimatedApparelSpriteBundle {
-    fn from(value: &NonAnimatedApparel) -> Self {
         Self {
             sprite: Sprite::default(),
             facing: Direction::default(),
@@ -118,7 +103,7 @@ impl From<&NonAnimatedApparel> for NonAnimatedApparelSpriteBundle {
             view_visibility: ViewVisibility::default(),
             atlas: TextureAtlas {
                 layout: value.texture_atlas_layout.clone(),
-                index: 3,
+                index: index,
             },
         }
     }
@@ -127,6 +112,13 @@ impl From<&NonAnimatedApparel> for NonAnimatedApparelSpriteBundle {
 #[derive(Component)]
 pub struct Apparel;
 
+pub trait Spawnable {
+    fn spawn(
+        &self,
+        mut commands: Commands,
+        texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    );
+}
 #[derive(Clone, Debug)]
 pub struct NonAnimatedApparel {
     /// The vertical and horizontal offset of the sprite from the center of the parent
@@ -141,6 +133,9 @@ pub struct NonAnimatedApparel {
 
     /// The Entity for which this apparel is attached
     pub parent_id: Entity,
+
+    /// The direction the parent entity is facing
+    pub facing: Direction,
 }
 
 impl NonAnimatedApparel {
@@ -149,17 +144,26 @@ impl NonAnimatedApparel {
         offset: Vec2,
         texture: Handle<Image>,
         texture_atlas_layout: Handle<TextureAtlasLayout>,
+        direction: Direction,
     ) -> Self {
         NonAnimatedApparel {
             offset: offset,
             parent_id: parent,
             texture: texture,
             texture_atlas_layout: texture_atlas_layout,
+            facing: direction,
         }
     }
 
-    pub fn spawn(&self, mut commands: Commands) {
-        let hat_bundle = (Apparel, NonAnimatedApparelSpriteBundle::from(self));
+    pub fn spawn(
+        &self,
+        mut commands: Commands,
+        texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    ) {
+        let hat_bundle = (
+            Apparel,
+            NonAnimatedApparelSpriteBundle::create(self, texture_atlas_layouts),
+        );
         commands.spawn(hat_bundle).set_parent(self.parent_id);
     }
 }
