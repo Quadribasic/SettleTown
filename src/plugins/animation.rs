@@ -109,20 +109,15 @@ pub fn execute_animations_indefinite(
 fn trigger_animation<S: Component>(
     mut query: Query<(&mut AnimationConfig, &mut Direction, &mut TextureAtlas), With<S>>,
 ) {
-    // we expect the Component of type S to be used as a marker Component by only a single entity
     let mut animation = query.single_mut();
     info!("Triggering animation with direction: {:?}", animation.1);
-    // we create a new timer when the animation is triggered
-    animation.0.first_sprite_index = (animation.1.clone() as usize) * 9;
-    info!(
-        "Setting first sprite index to: {:?}",
-        animation.0.first_sprite_index
-    );
+
+    // Calculate the base index for the current direction's animation frames
+    let direction_index = (*animation.1).clone() as usize;
+    animation.0.first_sprite_index = direction_index * 9;
     animation.0.last_sprite_index = animation.0.first_sprite_index + 8;
-    info!(
-        "Setting last sprite index to: {:?}",
-        animation.0.last_sprite_index
-    );
+
+    // Set the current frame to the first frame of the animation
     animation.2.index = animation.0.first_sprite_index;
 
     animation.0.frame_timer = AnimationConfig::timer_from_fps(animation.0.fps);

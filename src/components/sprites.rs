@@ -8,26 +8,20 @@ use bevy::{
     sprite::{Sprite, TextureAtlas, TextureAtlasLayout},
 };
 
-#[derive(Clone, Component, Debug)]
+#[derive(Clone, Component, Debug, Default)]
 pub enum Direction {
     North = 0,
     West = 1,
+    #[default]
     South = 2,
     East = 3,
 }
 
-impl Into<usize> for Direction {
-    fn into(self) -> usize {
-        self as usize
+impl From<Direction> for usize {
+    fn from(val: Direction) -> Self {
+        val as usize
     }
 }
-
-impl Default for Direction {
-    fn default() -> Self {
-        Direction::South
-    }
-}
-
 /// Specifies the direction an entity is facing (given that the entity _can_ face more than one
 /// direction). This is designed for the player character and NPCs, but can be used for any sprites
 /// that have multiple directions it can face.
@@ -45,7 +39,8 @@ pub struct DirectionalSpriteBundle {
     pub visibility: Visibility,
     /// Inherited visibility of an entity.
     pub inherited_visibility: InheritedVisibility,
-    /// Algorithmically-computed indication of whether an entity is visible and should be extracted for rendering
+    /// Algorithmically-computed indication of whether an entity is visible and should be extracted
+    /// for rendering
     pub view_visibility: ViewVisibility,
     /// The direction the sprite is facing
     pub facing: Direction,
