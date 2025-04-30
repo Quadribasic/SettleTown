@@ -24,7 +24,7 @@ impl Into<usize> for Direction {
 
 impl Default for Direction {
     fn default() -> Self {
-        Direction::West
+        Direction::South
     }
 }
 

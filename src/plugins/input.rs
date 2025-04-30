@@ -54,7 +54,11 @@ fn keyboard_input_system(
     // Update the player character's facing direction and the position of the
     // player character.
     let mut pc_movement: Vec3 = player_char.1.translation.clone();
-    if keyboard_input.pressed(KeyCode::ArrowRight) {
+    if [KeyCode::ArrowRight, KeyCode::KeyD]
+        .iter()
+        .any(|&key| keyboard_input.pressed(key))
+    {
+        info!("Setting direction to EAST");
         *player_char.0 = Direction::East;
         pc_movement = Vec3::new(
             pc_movement.x + shift_multiplier * PLAYER_MOVEMENT_SPEED,
@@ -62,8 +66,12 @@ fn keyboard_input_system(
             pc_movement.z,
         );
         horizontal_camera_movement += shift_multiplier * PLAYER_MOVEMENT_SPEED;
-    } else if keyboard_input.pressed(KeyCode::ArrowLeft) {
+    } else if [KeyCode::ArrowLeft, KeyCode::KeyA]
+        .iter()
+        .any(|&key| keyboard_input.pressed(key))
+    {
         *player_char.0 = Direction::West;
+        info!("Setting direction to WEST");
         pc_movement = Vec3::new(
             pc_movement.x - shift_multiplier * PLAYER_MOVEMENT_SPEED,
             pc_movement.y,
@@ -72,16 +80,24 @@ fn keyboard_input_system(
         horizontal_camera_movement -= shift_multiplier * PLAYER_MOVEMENT_SPEED;
     }
 
-    if keyboard_input.pressed(KeyCode::ArrowUp) {
+    if [KeyCode::ArrowUp, KeyCode::KeyW]
+        .iter()
+        .any(|&key| keyboard_input.pressed(key))
+    {
         *player_char.0 = Direction::North;
+        info!("Setting direction to NORTH");
         pc_movement = Vec3::new(
             pc_movement.x,
             pc_movement.y + shift_multiplier * PLAYER_MOVEMENT_SPEED,
             pc_movement.z,
         );
         vertical_camera_movement += shift_multiplier * PLAYER_MOVEMENT_SPEED;
-    } else if keyboard_input.pressed(KeyCode::ArrowDown) {
+    } else if [KeyCode::ArrowDown, KeyCode::KeyS]
+        .iter()
+        .any(|&key| keyboard_input.pressed(key))
+    {
         *player_char.0 = Direction::South;
+        info!("Setting direction to SOUTH");
         pc_movement = Vec3::new(
             pc_movement.x,
             pc_movement.y - shift_multiplier * PLAYER_MOVEMENT_SPEED,
@@ -111,23 +127,28 @@ fn keyboard_input_system(
     //     player_char.1.translation.x, player_char.1.translation.y
     // );
 
-    if keyboard_input.just_released(KeyCode::ArrowRight)
-        || keyboard_input.just_released(KeyCode::ArrowLeft)
-        || keyboard_input.just_released(KeyCode::ArrowUp)
-        || keyboard_input.just_released(KeyCode::ArrowDown)
+    if [
+        KeyCode::ArrowRight,
+        KeyCode::ArrowLeft,
+        KeyCode::ArrowUp,
+        KeyCode::ArrowDown,
+        KeyCode::KeyW,
+        KeyCode::KeyA,
+        KeyCode::KeyS,
+        KeyCode::KeyD,
+    ]
+    .iter()
+    .any(|key| keyboard_input.just_released(*key))
     {
         // Stop the player character's walking animation and reset it to the appropriate frame.
-        player_char.3.should_run = false;
-        player_char.2.index = player_char.3.first_sprite_index;
+        player_char.3.should_run_animation = false;
     }
 
     // Also update the animation for the direction the player is facing
-    // player_char.2.index = (player_char.0.clone() as usize) * 9;
-    // player_char.3.first_sprite_index = (player_char.0.clone() as usize) * 9;
-    // player_char.3.last_sprite_index = player_char.3.first_sprite_index + 8;
+    player_char.3.first_sprite_index = (player_char.0.clone() as usize) * 9;
+    player_char.3.last_sprite_index = player_char.3.first_sprite_index + 8;
 
     // Update the camera
-
     // Only move the camera until the left edge aligns with the left edge of the world, the right
     // edge aligns with the right edge of the world, the top edge aligns with the top edge of
     // the world, or the bottom edge aligns with the bottom edge of the world.

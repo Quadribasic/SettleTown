@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use bevy::{
     app::{Plugin, Update},
+    ecs::schedule::Condition,
     input::common_conditions::input_just_pressed,
     log::info,
     prelude::{Component, IntoSystemConfigs, KeyCode, Query, Res, With},
@@ -19,7 +20,7 @@ pub struct AnimationConfig {
     pub last_sprite_index: usize,
     pub fps: u8,
     pub frame_timer: Timer,
-    pub should_run: bool,
+    pub should_run_animation: bool,
 }
 
 impl AnimationConfig {
@@ -27,9 +28,9 @@ impl AnimationConfig {
         Self {
             first_sprite_index: first_frame,
             last_sprite_index: last_frame,
-            fps: fps,
+            fps,
             frame_timer: Self::timer_from_fps(fps),
-            should_run: false,
+            should_run_animation: false,
         }
     }
 
@@ -45,13 +46,16 @@ impl Plugin for SettleTownSpriteAnimatorPlugin {
         app.add_systems(
             Update,
             (
-                trigger_animation::<DirectionalSprite>
-                    .run_if(input_just_pressed(KeyCode::ArrowRight)),
-                trigger_animation::<DirectionalSprite>
-                    .run_if(input_just_pressed(KeyCode::ArrowLeft)),
-                trigger_animation::<DirectionalSprite>.run_if(input_just_pressed(KeyCode::ArrowUp)),
-                trigger_animation::<DirectionalSprite>
-                    .run_if(input_just_pressed(KeyCode::ArrowDown)),
+                (trigger_animation::<DirectionalSprite>).run_if(
+                    input_just_pressed(KeyCode::ArrowRight)
+                        .or_else(input_just_pressed(KeyCode::ArrowLeft))
+                        .or_else(input_just_pressed(KeyCode::ArrowUp))
+                        .or_else(input_just_pressed(KeyCode::ArrowDown))
+                        .or_else(input_just_pressed(KeyCode::KeyW))
+                        .or_else(input_just_pressed(KeyCode::KeyA))
+                        .or_else(input_just_pressed(KeyCode::KeyS))
+                        .or_else(input_just_pressed(KeyCode::KeyD)),
+                ),
                 execute_animations_indefinite,
             )
                 .chain(),
@@ -67,11 +71,12 @@ pub fn execute_animations_indefinite(
     // This loops through all the frames in the texture atlas, from first to last frame
     // as defined in the AnimationConfig.
     for (mut config, mut atlas) in &mut query {
-        if config.should_run {
-            // info!(
-            //     "Running animation with first sprite index: {:?}",
-            //     config.first_sprite_index
-            // );
+        if config.should_run_animation {
+            info!(
+                "Running animation for frames: {:?} through {:?}",
+                config.first_sprite_index, config.last_sprite_index,
+            );
+
             // we track how long the current sprite has been displayed for
             config.frame_timer.tick(time.delta());
 
@@ -95,6 +100,8 @@ pub fn execute_animations_indefinite(
                     config.frame_timer = AnimationConfig::timer_from_fps(config.fps);
                 }
             }
+        } else {
+            atlas.index = config.first_sprite_index;
         }
     }
 }
@@ -119,5 +126,5 @@ fn trigger_animation<S: Component>(
     animation.2.index = animation.0.first_sprite_index;
 
     animation.0.frame_timer = AnimationConfig::timer_from_fps(animation.0.fps);
-    animation.0.should_run = true;
+    animation.0.should_run_animation = true;
 }
