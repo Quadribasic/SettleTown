@@ -1,0 +1,28 @@
+# Basic formatting options
+max_width = 100
+hard_tabs = false
+tab_spaces = 4
+newline_style = "Auto"
+use_small_heuristics = "Default"
+
+# Imports
+imports_granularity = "Crate"
+group_imports = "StdExternalCrate"
+
+# Comments and documentation
+wrap_comments = true
+comment_width = 100
+normalize_comments = true
+
+# Structural elements
+struct_field_align_threshold = 0
+enum_discrim_align_threshold = 0
+where_single_line = true
+brace_style = "SameLineWhere"
+control_brace_style = "AlwaysSameLine"
+
+# Other
+format_strings = true
+format_macro_matchers = true
+format_macro_bodies = true
+reorder_impl_items = true
