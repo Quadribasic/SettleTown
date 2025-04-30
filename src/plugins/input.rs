@@ -12,21 +12,25 @@ use crate::{
 
 const PLAYER_MOVEMENT_SPEED: f32 = 1.0;
 
+/// A query for assets that apparel pieces for a character. These have a direction and a
+/// texture atlas from which the sprites are retrieved. They are children of the character asset.
+type ApparelQuery<'a> = (&'a Parent, &'a mut Direction, &'a mut TextureAtlas);
+
+/// A query for assets that are cameras in the scene.
+type CameraQuery<'a> = (&'a mut Camera, &'a mut Transform, &'a GlobalTransform);
+
+/// A query for assets that are players (a specific type of character) in the scene.
+type PlayerQuery<'a> = (
+    &'a mut Direction,
+    &'a mut Transform,
+    &'a mut TextureAtlas,
+    &'a mut AnimationConfig,
+);
+
 fn keyboard_input_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut query_camera: Query<
-        (&mut Camera, &mut Transform, &GlobalTransform),
-        (With<OverheadMapCamera>, Without<PlayerCharacter>),
-    >,
-    mut query_player_character: Query<
-        (
-            &mut Direction,
-            &mut Transform,
-            &mut TextureAtlas,
-            &mut AnimationConfig,
-        ),
-        With<PlayerCharacter>,
-    >,
+    mut query_camera: Query<CameraQuery, (With<OverheadMapCamera>, Without<PlayerCharacter>)>,
+    mut query_player_character: Query<PlayerQuery, With<PlayerCharacter>>,
     world_coords: Res<WorldCoordinates>,
     viewport_size: Res<ViewportWorldSize>,
 ) {
@@ -222,10 +226,7 @@ impl Plugin for SettleTownInputPlugin {
 
 fn update_child_directions(
     parent_query: Query<&Direction, With<PlayerCharacter>>,
-    mut child_query: Query<
-        (&Parent, &mut Direction, &mut TextureAtlas),
-        (With<Apparel>, Without<PlayerCharacter>),
-    >,
+    mut child_query: Query<ApparelQuery, (With<Apparel>, Without<PlayerCharacter>)>,
 ) {
     // XXX_jwir3: We'll need to make sure that we iterate through _all_ apparel once we have
     // multiple possible pieces.
