@@ -53,11 +53,11 @@ fn keyboard_input_system(
         player_char.3.fps = PLAYER_CHARACTER_WALK_FPS;
     }
 
-    let player_char_original_pos = player_char.1.translation.clone();
+    let player_char_original_pos = player_char.1.translation;
 
     // Update the player character's facing direction and the position of the
     // player character.
-    let mut pc_movement: Vec3 = player_char.1.translation.clone();
+    let mut pc_movement: Vec3 = player_char.1.translation;
     if [KeyCode::ArrowRight, KeyCode::KeyD]
         .iter()
         .any(|&key| keyboard_input.pressed(key))

@@ -222,9 +222,9 @@ pub enum GroundTileType {
     RockyDirtAlternate3 = 35,
 }
 
-impl Into<u32> for GroundTileType {
-    fn into(self) -> u32 {
-        self as u32
+impl From<GroundTileType> for u32 {
+    fn from(val: GroundTileType) -> Self {
+        val as u32
     }
 }
 
@@ -257,7 +257,7 @@ impl Layer {
 
         Self {
             layer_size: (width, height),
-            tiles: tiles,
+            tiles,
             default_tile: None,
         }
     }
@@ -275,7 +275,7 @@ impl Layer {
         }
 
         Self {
-            tiles: tiles,
+            tiles,
             layer_size: (width, height),
             default_tile: Some(base_tile.clone()),
         }
