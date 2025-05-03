@@ -118,8 +118,7 @@ fn trigger_animation<S: Component>(
     animation.0.last_sprite_index = animation.0.first_sprite_index + 8;
 
     // Set the current frame to the first frame of the animation
-    animation.2.index = animation.0.first_sprite_index;tduunvbnttehgiffuflklgu
-    
+    animation.2.index = animation.0.first_sprite_index;
 
     animation.0.frame_timer = AnimationConfig::timer_from_fps(animation.0.fps);
     animation.0.should_run_animation = true;
