@@ -9,9 +9,9 @@ use bevy::{
     DefaultPlugins,
 };
 
-pub struct SettleTownSplashScreenPlugin;
+pub struct SettleTownLoadingSplashScreenPlugin;
 
-impl SettleTownSplashScreenPlugin {
+impl SettleTownLoadingSplashScreenPlugin {
     fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         commands.spawn(Camera2dBundle::default());
         commands.spawn(SpriteBundle {
@@ -21,7 +21,7 @@ impl SettleTownSplashScreenPlugin {
     }
 }
 
-impl Plugin for SettleTownSplashScreenPlugin {
+impl Plugin for SettleTownLoadingSplashScreenPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
@@ -45,7 +45,7 @@ impl Plugin for SettleTownSplashScreenPlugin {
         }))
         // ClearColor must have 0 alpha, otherwise some color will bleed through
         .insert_resource(ClearColor(Color::NONE))
-        .add_systems(Startup, SettleTownSplashScreenPlugin::setup);
+        .add_systems(Startup, SettleTownLoadingSplashScreenPlugin::setup);
         // app.add_systems(Startup, spawn_player_character_entity);
     }
 }
