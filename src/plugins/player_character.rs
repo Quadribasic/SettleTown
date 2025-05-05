@@ -3,25 +3,32 @@ use bevy::{
     asset::{AssetServer, Assets, Handle},
     log::info,
     math::{UVec2, Vec2, Vec3},
-    prelude::{Commands, Component, Image, Res, ResMut, Transform},
+    prelude::*,
     sprite::{TextureAtlas, TextureAtlasLayout},
 };
+use bevy_state::state::States;
 
 use crate::{
     components::sprites::{
         Direction, DirectionalSprite, DirectionalSpriteBundle, NonAnimatedApparel,
     },
     plugins::animation::AnimationConfig,
+    states::game_states::GameState,
 };
 
 pub const PLAYER_CHARACTER_WALK_FPS: u8 = 10;
 pub const PLAYER_CHARACTER_RUN_FPS: u8 = 100;
 
-pub struct SettleTownPlayerCharacterPlugin;
+pub struct SettleTownPlayerCharacterPlugin<S: States> {
+    pub enabled_state: S,
+}
 
-impl Plugin for SettleTownPlayerCharacterPlugin {
+impl<S: States> Plugin for SettleTownPlayerCharacterPlugin<S> {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.add_systems(Startup, spawn_player_character_entity);
+        app.add_systems(
+            OnEnter(self.enabled_state.clone()),
+            spawn_player_character_entity,
+        );
     }
 }
 

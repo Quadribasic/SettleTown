@@ -8,6 +8,7 @@ use super::{
 use crate::{
     components::sprites::{Apparel, Direction, DirectionalSprite, NonAnimatedApparel},
     resources::world::WorldCoordinates,
+    states::game_states::GameState,
 };
 
 const PLAYER_MOVEMENT_SPEED: f32 = 1.0;
@@ -62,7 +63,7 @@ fn keyboard_input_system(
         .iter()
         .any(|&key| keyboard_input.pressed(key))
     {
-        info!("Setting direction to EAST");
+        // info!("Setting direction to EAST");
         *player_char.0 = Direction::East;
         pc_movement = Vec3::new(
             pc_movement.x + shift_multiplier * PLAYER_MOVEMENT_SPEED,
@@ -75,7 +76,7 @@ fn keyboard_input_system(
         .any(|&key| keyboard_input.pressed(key))
     {
         *player_char.0 = Direction::West;
-        info!("Setting direction to WEST");
+        // info!("Setting direction to WEST");
         pc_movement = Vec3::new(
             pc_movement.x - shift_multiplier * PLAYER_MOVEMENT_SPEED,
             pc_movement.y,
@@ -89,7 +90,7 @@ fn keyboard_input_system(
         .any(|&key| keyboard_input.pressed(key))
     {
         *player_char.0 = Direction::North;
-        info!("Setting direction to NORTH");
+        // info!("Setting direction to NORTH");
         pc_movement = Vec3::new(
             pc_movement.x,
             pc_movement.y + shift_multiplier * PLAYER_MOVEMENT_SPEED,
@@ -101,7 +102,7 @@ fn keyboard_input_system(
         .any(|&key| keyboard_input.pressed(key))
     {
         *player_char.0 = Direction::South;
-        info!("Setting direction to SOUTH");
+        // info!("Setting direction to SOUTH");
         pc_movement = Vec3::new(
             pc_movement.x,
             pc_movement.y - shift_multiplier * PLAYER_MOVEMENT_SPEED,
@@ -211,49 +212,53 @@ fn keyboard_input_system(
     );
 }
 
-pub struct SettleTownInputPlugin;
+pub struct SettleTownInputPlugin<S: States> {
+    pub enabled_state: S,
+}
 
-impl Plugin for SettleTownInputPlugin {
+impl<S: States> Plugin for SettleTownInputPlugin<S> {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            keyboard_input_system.before(execute_animations_indefinite),
+            keyboard_input_system
+                .before(execute_animations_indefinite)
+                .run_if(in_state(self.enabled_state.clone())),
         );
 
-        app.add_systems(Update, update_child_directions.after(keyboard_input_system));
+        // app.add_systems(Update, update_child_directions.after(keyboard_input_system));
     }
 }
 
-fn update_child_directions(
-    parent_query: Query<&Direction, With<PlayerCharacter>>,
-    mut child_query: Query<ApparelQuery, (With<Apparel>, Without<PlayerCharacter>)>,
-) {
-    // XXX_jwir3: We'll need to make sure that we iterate through _all_ apparel once we have
-    // multiple possible pieces.
-    let player_char_direction = parent_query.single();
-    let child = child_query.get_single_mut();
-    if let Ok(mut child_val) = child {
-        *child_val.1 = player_char_direction.clone();
-        child_val.2.index = player_char_direction.clone() as usize;
-    }
-    // for mut child in child_query.iter_mut() {
-    //     child.1 = player_char_direction.clone();
-    //     child.2 = TextureAtlas {
-    //         layout: child.2.layout,
-    //         index: (*player_char_direction) as usize,
-    //     };
-    //     // child.2.index = (*player_char_direction) as usize;
-    //     info!("Apparel facing direction is now: {:?}", child.1);
-    // }
+// fn update_child_directions(
+//     parent_query: Query<&Direction, With<PlayerCharacter>>,
+//     mut child_query: Query<ApparelQuery, (With<Apparel>, Without<PlayerCharacter>)>,
+// ) {
+//     // XXX_jwir3: We'll need to make sure that we iterate through _all_ apparel once we have
+//     // multiple possible pieces.
+//     let player_char_direction = parent_query.single();
+//     let child = child_query.get_single_mut();
+//     if let Ok(mut child_val) = child {
+//         *child_val.1 = player_char_direction.clone();
+//         child_val.2.index = player_char_direction.clone() as usize;
+//     }
+//     // for mut child in child_query.iter_mut() {
+//     //     child.1 = player_char_direction.clone();
+//     //     child.2 = TextureAtlas {
+//     //         layout: child.2.layout,
+//     //         index: (*player_char_direction) as usize,
+//     //     };
+//     //     // child.2.index = (*player_char_direction) as usize;
+//     //     info!("Apparel facing direction is now: {:?}", child.1);
+//     // }
 
-    // // get the properties of each squad
-    // for (squad_dmg, children) in q_parent.iter() {
-    //     // `children` is a collection of Entity IDs
-    //     for &child in children.iter() {
-    //         // get the health of each child unit
-    //         let health = q_child.get(child);
+//     // // get the properties of each squad
+//     // for (squad_dmg, children) in q_parent.iter() {
+//     //     // `children` is a collection of Entity IDs
+//     //     for &child in children.iter() {
+//     //         // get the health of each child unit
+//     //         let health = q_child.get(child);
 
-    //         // do something
-    //     }
-    // }
-}
+//     //         // do something
+//     //     }
+//     // }
+// }

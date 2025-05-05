@@ -3,13 +3,18 @@ use std::collections::HashMap;
 use bevy::{
     app::{Plugin, Startup},
     asset::AssetServer,
+    ecs::schedule::IntoSystemConfigs,
     prelude::{Commands, Res, Resource},
 };
 use bevy_ecs_tilemap::{
     map::{TilemapId, TilemapSize, TilemapTexture, TilemapTileSize, TilemapType},
-    prelude::get_tilemap_center_transform,
+    prelude::*,
     tiles::{TileBundle, TilePos, TileStorage, TileTextureIndex},
     TilemapBundle, TilemapPlugin,
+};
+use bevy_state::{
+    condition::in_state,
+    state::{OnEnter, States},
 };
 use mapgen::{DrunkardsWalk, MapBuilder as MapgenMapBuilder, TileType};
 use rand::{thread_rng, Rng};
@@ -20,24 +25,28 @@ use crate::resources::world::WorldCoordinates;
 const TILE_MAP_TILE_WIDTH: f32 = 32.0;
 const TILE_MAP_TILE_HEIGHT: f32 = 32.0;
 
-pub struct SettleTownLayerPlugin {
+pub struct SettleTownLayerPlugin<S: States> {
     layer_width: usize,
     layer_height: usize,
+    enabled_state: S,
 }
 
-impl SettleTownLayerPlugin {
-    pub fn new(width: usize, height: usize) -> Self {
+impl<S: States> SettleTownLayerPlugin<S> {
+    pub fn new(width: usize, height: usize, enabled_state: S) -> Self {
         Self {
             layer_width: width,
             layer_height: height,
+            enabled_state,
         }
     }
 }
 
-impl Plugin for SettleTownLayerPlugin {
+impl<S: States> Plugin for SettleTownLayerPlugin<S> {
     fn build(&self, app: &mut bevy::prelude::App) {
         let mut layer_stack = LayerStack::new();
         layer_stack.add_layers(
+            // XXX_jwir3: We should be creating the layer during the initial load phase of the
+            //            game, not here.
             GroundLayerBuilder::new(self.layer_width, self.layer_height, GroundTileType::Grass)
                 .add_edges_and_corner_tiles_for_base_tile(
                     GroundTileType::Grass,
@@ -119,7 +128,14 @@ impl Plugin for SettleTownLayerPlugin {
             self.layer_width,
             self.layer_height,
         ));
-        app.add_systems(Startup, setup_rendering_of_layers);
+        // app.add_systems(
+        //     Startup,
+        //     setup_rendering_of_layers.run_if(in_state(self.enabled_state.clone())),
+        // );
+        app.add_systems(
+            OnEnter(self.enabled_state.clone()),
+            setup_rendering_of_layers,
+        );
     }
 }
 

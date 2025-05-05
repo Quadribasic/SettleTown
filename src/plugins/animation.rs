@@ -5,12 +5,16 @@ use bevy::{
     ecs::schedule::Condition,
     input::common_conditions::input_just_pressed,
     log::info,
-    prelude::{Component, IntoSystemConfigs, KeyCode, Query, Res, With},
+    prelude::*,
     sprite::TextureAtlas,
     time::{Time, Timer, TimerMode},
 };
+use bevy_state::state::States;
 
-use crate::components::sprites::{Direction, DirectionalSprite};
+use crate::{
+    components::sprites::{Direction, DirectionalSprite},
+    states::game_states::GameState,
+};
 
 // XXX_jwir3: We should probably externalize this, as it's not going to be limited to _only_ the
 //            player character, but rather all sprites.
@@ -39,23 +43,28 @@ impl AnimationConfig {
     }
 }
 
-pub struct SettleTownSpriteAnimatorPlugin;
+pub struct SettleTownSpriteAnimatorPlugin<S: States> {
+    pub enabled_state: S,
+}
 
-impl Plugin for SettleTownSpriteAnimatorPlugin {
+impl<S: States> Plugin for SettleTownSpriteAnimatorPlugin<S> {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_systems(
             Update,
             (
-                (trigger_animation::<DirectionalSprite>).run_if(
-                    input_just_pressed(KeyCode::ArrowRight)
-                        .or_else(input_just_pressed(KeyCode::ArrowLeft))
-                        .or_else(input_just_pressed(KeyCode::ArrowUp))
-                        .or_else(input_just_pressed(KeyCode::ArrowDown))
-                        .or_else(input_just_pressed(KeyCode::KeyW))
-                        .or_else(input_just_pressed(KeyCode::KeyA))
-                        .or_else(input_just_pressed(KeyCode::KeyS))
-                        .or_else(input_just_pressed(KeyCode::KeyD)),
-                ),
+                (trigger_animation::<DirectionalSprite>)
+                    // .run_if(in_state(self.enabled_state.clone()))
+                    .run_if(
+                        input_just_pressed(KeyCode::ArrowRight)
+                            .or_else(input_just_pressed(KeyCode::ArrowLeft))
+                            .or_else(input_just_pressed(KeyCode::ArrowUp))
+                            .or_else(input_just_pressed(KeyCode::ArrowDown))
+                            .or_else(input_just_pressed(KeyCode::KeyW))
+                            .or_else(input_just_pressed(KeyCode::KeyA))
+                            .or_else(input_just_pressed(KeyCode::KeyS))
+                            .or_else(input_just_pressed(KeyCode::KeyD)),
+                    ),
+                // execute_animations_indefinite.run_if(in_state(self.enabled_state.clone())),
                 execute_animations_indefinite,
             )
                 .chain(),
@@ -67,15 +76,23 @@ impl Plugin for SettleTownSpriteAnimatorPlugin {
 pub fn execute_animations_indefinite(
     time: Res<Time>,
     mut query: Query<(&mut AnimationConfig, &mut TextureAtlas), With<DirectionalSprite>>,
+    current_state: Res<State<GameState>>,
 ) {
+    // XXX_jwir3: This is a bit of a hack, but if we don't do this and instead use .run_if
+    // for this system, then it will cause issues with the animation not picking up the
+    // correct initial frame.
+    if *current_state.get() != GameState::InGameWorld {
+        return;
+    }
+
     // This loops through all the frames in the texture atlas, from first to last frame
     // as defined in the AnimationConfig.
     for (mut config, mut atlas) in &mut query {
         if config.should_run_animation {
-            info!(
-                "Running animation for frames: {:?} through {:?}",
-                config.first_sprite_index, config.last_sprite_index,
-            );
+            // info!(
+            //     "Running animation for frames: {:?} through {:?}",
+            //     config.first_sprite_index, config.last_sprite_index,
+            // );
 
             // we track how long the current sprite has been displayed for
             config.frame_timer.tick(time.delta());
@@ -108,7 +125,12 @@ pub fn execute_animations_indefinite(
 
 fn trigger_animation<S: Component>(
     mut query: Query<(&mut AnimationConfig, &mut Direction, &mut TextureAtlas), With<S>>,
+    current_state: Res<State<GameState>>,
 ) {
+    if *current_state.get() != GameState::InGameWorld {
+        return;
+    }
+
     let mut animation = query.single_mut();
     info!("Triggering animation with direction: {:?}", animation.1);
 
