@@ -1,23 +1,23 @@
 use std::time::Duration;
 
-use bevy::{
-    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
-    prelude::*,
-    window::{Cursor, InternalWindowState, PresentMode, WindowCloseRequested},
-};
+use bevy::{prelude::*, window::WindowPlugin};
 use plugins::{
-    game_world_window::{GameWorldWindow, SettleTownGameWorldWindowPlugin},
-    splash_screen::{SettleTownLoadingSplashScreenPlugin, SplashScreenSprite},
+    game_world_window::{
+        GameWorldWindow, SettleTownGameWorldWindowPlugin, DEFAULT_WINDOW_HEIGHT,
+        DEFAULT_WINDOW_WIDTH,
+    },
+    splash_screen::{SettleTownLoadingSplashScreenPlugin, SplashScreenWindow},
 };
 use states::game_states::GameState;
-
-// use crate::plugins::game_world_window::SettleTownGameWorldWindowPlugin;
 
 mod components;
 mod plugins;
 mod resources;
 mod states;
 mod systems;
+
+#[derive(Component)]
+pub struct DefaultWindow;
 
 struct DurationSplashScreenVisible(Duration);
 
@@ -29,7 +29,22 @@ impl Default for DurationSplashScreenVisible {
 
 fn main() {
     App::new()
-        // .add_plugins((LogDiagnosticsPlugin::default(), FrameTimeDiagnosticsPlugin))
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                visible: false,
+                ..default()
+            }),
+            ..default()
+        }))
+        // Add the marker component to the default window.
+        .add_systems(
+            Startup,
+            |mut commands: Commands, window: Query<Entity, Added<Window>>| {
+                if let Ok(window_entity) = window.get_single() {
+                    commands.entity(window_entity).insert(DefaultWindow);
+                }
+            },
+        )
         .add_plugins(SettleTownLoadingSplashScreenPlugin)
         .add_systems(
             Update,
@@ -42,9 +57,9 @@ fn main() {
         )
         .add_plugins(SettleTownGameWorldWindowPlugin {
             enabled_state: GameState::InGameWorld,
-            is_fullscreen: false,
-            window_width: 1408,
-            window_height: 768,
+            _is_fullscreen: false,
+            window_width: DEFAULT_WINDOW_WIDTH as i32,
+            window_height: DEFAULT_WINDOW_HEIGHT as i32,
         })
         .run();
 }
@@ -66,66 +81,32 @@ fn transition_from_loading_splash_screen_once_time_has_elapsed(
     }
 }
 
-fn spawn_game_world_window(mut commands: Commands) {
-    info!("Creating game window");
+fn make_main_window_invisible(
+    mut commands: Commands,
+    default_window: Query<Entity, With<DefaultWindow>>,
+    splash_screen_window: Query<Entity, With<SplashScreenWindow>>,
+) {
+    // Create the game world window first
+    info!("Creating game world window");
     commands.spawn((
         Window {
-            cursor: Cursor::default(),
-            present_mode: bevy::window::PresentMode::AutoVsync,
-            mode: bevy::window::WindowMode::Windowed,
-            position: WindowPosition::default(),
-            resolution: (1408.0, 768.0).into(),
             title: "SettleTown".into(),
-            name: Some("com.quadribasic.settletown.main".into()),
-            composite_alpha_mode: bevy::window::CompositeAlphaMode::Auto,
-            resize_constraints: WindowResizeConstraints::default(),
+            resolution: (1408.0, 768.0).into(),
             resizable: false,
-            enabled_buttons: bevy::window::EnabledButtons {
-                maximize: false,
-                ..Default::default()
-            },
-            decorations: true,
-            transparent: false,
-            focused: true,
-            window_level: bevy::window::WindowLevel::Normal,
-            canvas: None,
-            fit_canvas_to_parent: false,
-            prevent_default_event_handling: false,
-            internal: InternalWindowState::default(),
-            ime_enabled: false,
-            visible: true,
-            ..Default::default()
+            ..default()
         },
         GameWorldWindow,
     ));
-}
 
-fn make_main_window_invisible(
-    mut commands: Commands,
-    mut window: Query<(Entity, &mut Window)>,
-    splash_screen_sprite: Query<Entity, With<SplashScreenSprite>>,
-    mut event_close: EventWriter<WindowCloseRequested>,
-) {
-    // Despawn the splash screen sprite unless we want it to stay around inside the game world,
-    // which we don't.
-    commands.entity(splash_screen_sprite.single()).despawn();
+    // Then despawn the default window
+    info!("Despawning default window");
+    commands.entity(default_window.single()).despawn();
 
-    // Winit does not support updating transparency after window creation, so we
-    // need to destroy the original window and create a new one.
-    let (window_entity, mut window) = window.single_mut();
-    info!("Making splash screen window invisible");
-    window.visible = false;
-
+    // Finally despawn the splash screen window
+    let window_entity = splash_screen_window.single();
     info!(
         "Despawning splash screen window (Entity: {:?})",
         window_entity
     );
     commands.entity(window_entity).despawn();
-
-    spawn_game_world_window(commands);
-
-    // info!("Dispatching event to close splash screen window");
-    // event_close.send(WindowCloseRequested {
-    //     window: window_entity,
-    // });
 }

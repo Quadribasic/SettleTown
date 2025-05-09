@@ -5,17 +5,13 @@ use super::{
     camera::{OverheadMapCamera, ViewportWorldSize},
     player_character::{PlayerCharacter, PLAYER_CHARACTER_RUN_FPS, PLAYER_CHARACTER_WALK_FPS},
 };
-use crate::{
-    components::sprites::{Apparel, Direction, DirectionalSprite, NonAnimatedApparel},
-    resources::world::WorldCoordinates,
-    states::game_states::GameState,
-};
+use crate::{components::sprites::Direction, resources::world::WorldCoordinates};
 
 const PLAYER_MOVEMENT_SPEED: f32 = 1.0;
 
-/// A query for assets that apparel pieces for a character. These have a direction and a
-/// texture atlas from which the sprites are retrieved. They are children of the character asset.
-type ApparelQuery<'a> = (&'a Parent, &'a mut Direction, &'a mut TextureAtlas);
+// A query for assets that apparel pieces for a character. These have a direction and a
+// texture atlas from which the sprites are retrieved. They are children of the character asset.
+// type ApparelQuery<'a> = (&'a Parent, &'a mut Direction, &'a mut TextureAtlas);
 
 /// A query for assets that are cameras in the scene.
 type CameraQuery<'a> = (&'a mut Camera, &'a mut Transform, &'a GlobalTransform);

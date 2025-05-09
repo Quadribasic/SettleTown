@@ -44,7 +44,7 @@ impl AnimationConfig {
 }
 
 pub struct SettleTownSpriteAnimatorPlugin<S: States> {
-    pub enabled_state: S,
+    pub _enabled_state: S,
 }
 
 impl<S: States> Plugin for SettleTownSpriteAnimatorPlugin<S> {
