@@ -1,19 +1,16 @@
 use bevy::{
-    app::{Plugin, Startup},
+    app::Plugin,
     asset::{AssetServer, Assets, Handle},
     log::info,
-    math::{UVec2, Vec2, Vec3},
+    math::{UVec2, Vec3},
     prelude::*,
     sprite::{TextureAtlas, TextureAtlasLayout},
 };
 use bevy_state::state::States;
 
 use crate::{
-    components::sprites::{
-        Direction, DirectionalSprite, DirectionalSpriteBundle, NonAnimatedApparel,
-    },
+    components::sprites::{Direction, DirectionalSprite, DirectionalSpriteBundle},
     plugins::animation::AnimationConfig,
-    states::game_states::GameState,
 };
 
 pub const PLAYER_CHARACTER_WALK_FPS: u8 = 10;
@@ -79,7 +76,7 @@ fn spawn_player_character_entity(
         DirectionalSprite,
     );
 
-    let player_character_entity = commands.spawn(bundle).id();
+    let _player_character_entity = commands.spawn(bundle).id();
 
     // let texture_atlas_layout_hat = texture_atlas_layouts.add(TextureAtlasLayout::from_grid(
     //     UVec2::new(64, 25),

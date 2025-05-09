@@ -1,9 +1,8 @@
 use std::collections::HashMap;
 
 use bevy::{
-    app::{Plugin, Startup},
+    app::Plugin,
     asset::AssetServer,
-    ecs::schedule::IntoSystemConfigs,
     prelude::{Commands, Res, Resource},
 };
 use bevy_ecs_tilemap::{
@@ -12,10 +11,7 @@ use bevy_ecs_tilemap::{
     tiles::{TileBundle, TilePos, TileStorage, TileTextureIndex},
     TilemapBundle, TilemapPlugin,
 };
-use bevy_state::{
-    condition::in_state,
-    state::{OnEnter, States},
-};
+use bevy_state::state::{OnEnter, States};
 use mapgen::{DrunkardsWalk, MapBuilder as MapgenMapBuilder, TileType};
 use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
@@ -369,8 +365,8 @@ impl GroundLayerBuilder {
         let ground_layer = Layer::new_from_base_tile(width, height, base_type);
         let ground_decoration_layer = Layer::new(width, height);
         GroundLayerBuilder {
-            ground_layer: ground_layer,
-            ground_decoration_layer: ground_decoration_layer,
+            ground_layer,
+            ground_decoration_layer,
             edge_map: HashMap::new(),
         }
     }
@@ -584,7 +580,7 @@ impl GroundLayerBuilder {
         for i in 0..map_size.0 {
             for j in 0..map_size.1 {
                 let single_index = (j * map_size.0) + i;
-                if map.tiles[single_index as usize] == TileType::Floor {
+                if map.tiles[single_index] == TileType::Floor {
                     self.ground_layer.set_tile_type_at(i, j, tile_type.clone());
                 }
             }
@@ -593,14 +589,14 @@ impl GroundLayerBuilder {
         self.clone()
     }
 
-    /// Replace an inside top-left corner of one tile type with another tile type.
-    ///
-    /// An "inside top left" corner is defined as a tile at (x, y) with a defined type where the
-    /// next right-most tile (x+1, y) is of the same type, as is the tile just beneath it (x, y-1),
-    /// but where the tile diagonally down and to the right (x+1, y-1) is of a different type.
-    ///
-    /// NOTE: This algorithm is correct, BUT we actually want to draw ON TOP OF the existing tile in
-    ///       that's diagonally adjacent.
+    // Replace an inside top-left corner of one tile type with another tile type.
+    //
+    // An "inside top left" corner is defined as a tile at (x, y) with a defined type where the
+    // next right-most tile (x+1, y) is of the same type, as is the tile just beneath it (x, y-1),
+    // but where the tile diagonally down and to the right (x+1, y-1) is of a different type.
+    //
+    // NOTE: This algorithm is correct, BUT we actually want to draw ON TOP OF the existing tile in
+    //       that's diagonally adjacent.
     // pub fn replace_inside_top_left_corners(
     //     &mut self,
     //     base_tile_type: GroundTileType,

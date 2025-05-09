@@ -1,13 +1,4 @@
-use bevy::{
-    app::Plugin,
-    core::FrameCount,
-    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
-    prelude::*,
-    sprite::calculate_bounds_2d,
-    utils::default,
-    window::{Window, WindowPlugin},
-    DefaultPlugins,
-};
+use bevy::{app::Plugin, prelude::*};
 
 use super::{
     animation::SettleTownSpriteAnimatorPlugin, camera::SettleTownCameraPlugin,
@@ -17,10 +8,10 @@ use super::{
 use crate::states::game_states::GameState;
 
 /// The default width of the game world window, in device pixels.
-const DEFAULT_WINDOW_WIDTH: i32 = 1408;
+pub const DEFAULT_WINDOW_WIDTH: f32 = 1408.0;
 
 // The default height of the game world window, in device pixels.
-const DEFAULT_WINDOW_HEIGHT: i32 = 768;
+pub const DEFAULT_WINDOW_HEIGHT: f32 = 768.0;
 
 /// The default tile width for layers, in device pixels.
 const DEFAULT_LAYER_TILE_WIDTH: usize = 320;
@@ -34,7 +25,7 @@ pub struct GameWorldWindow;
 
 pub struct SettleTownGameWorldWindowPlugin<S: States> {
     pub enabled_state: S,
-    pub is_fullscreen: bool,
+    pub _is_fullscreen: bool,
     pub window_width: i32,
     pub window_height: i32,
 }
@@ -80,7 +71,7 @@ impl<S: States> Plugin for SettleTownGameWorldWindowPlugin<S> {
             enabled_state: GameState::InGameWorld,
         })
         .add_plugins(SettleTownSpriteAnimatorPlugin {
-            enabled_state: GameState::InGameWorld,
+            _enabled_state: GameState::InGameWorld,
         });
         // The world inspector plugin allows us to take a look at the world
         // so we can see bounding boxes, etc.

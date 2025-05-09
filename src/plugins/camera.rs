@@ -1,13 +1,7 @@
-use bevy::{
-    app::{Plugin, Startup},
-    prelude::*,
-    render::camera::RenderTarget,
-    window::WindowRef,
-};
+use bevy::{app::Plugin, prelude::*, render::camera::RenderTarget, window::WindowRef};
 use bevy_state::state::States;
 
 use super::game_world_window::GameWorldWindow;
-use crate::states::game_states::GameState;
 
 #[derive(Resource)]
 pub struct ViewportWorldSize {

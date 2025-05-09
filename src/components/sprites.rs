@@ -1,11 +1,10 @@
 use bevy::{
     asset::Handle,
-    math::{Vec2, Vec3},
-    prelude::{
-        BuildChildren, Bundle, Commands, Component, Entity, GlobalTransform, Image,
-        InheritedVisibility, Transform, ViewVisibility, Visibility,
-    },
-    sprite::{Sprite, TextureAtlas, TextureAtlasLayout},
+    ecs::{bundle::Bundle, component::Component},
+    prelude::{InheritedVisibility, Transform, ViewVisibility, Visibility},
+    render::texture::Image,
+    sprite::{Sprite, TextureAtlas},
+    transform::components::GlobalTransform,
 };
 
 #[derive(Clone, Component, Debug, Default)]
@@ -57,9 +56,9 @@ impl DirectionalSpriteBundle {
     ) -> Self {
         Self {
             atlas: texture_atlas,
-            transform: transform,
-            texture: texture,
-            facing: facing,
+            transform,
+            texture,
+            facing,
             ..Default::default()
         }
     }
@@ -69,92 +68,92 @@ impl DirectionalSpriteBundle {
 #[derive(Component, Debug)]
 pub struct DirectionalSprite;
 
-/// A sprite that doesn't animate with the parent entity to which it is attached. Thus, there are
-/// only four different frames to the texture atlas: the four cardinal directions.
-pub type NonAnimatedApparelSpriteBundle = DirectionalSpriteBundle;
+// A sprite that doesn't animate with the parent entity to which it is attached. Thus, there are
+// only four different frames to the texture atlas: the four cardinal directions.
+// pub type NonAnimatedApparelSpriteBundle = DirectionalSpriteBundle;
 
-impl From<NonAnimatedApparel> for NonAnimatedApparelSpriteBundle {
-    fn from(value: NonAnimatedApparel) -> Self {
-        Self {
-            sprite: Sprite::default(),
-            facing: Direction::default(),
-            texture: value.texture,
-            transform: Transform::from_scale(Vec3::splat(1.0)).with_translation(Vec3::new(
-                value.offset.x,
-                value.offset.y,
-                2.0,
-            )),
-            global_transform: GlobalTransform::default(),
-            visibility: Visibility::default(),
-            inherited_visibility: InheritedVisibility::default(),
-            view_visibility: ViewVisibility::default(),
-            atlas: TextureAtlas {
-                layout: value.texture_atlas_layout,
-                index: 3,
-            },
-        }
-    }
-}
+// impl From<NonAnimatedApparel> for NonAnimatedApparelSpriteBundle {
+//     fn from(value: NonAnimatedApparel) -> Self {
+//         Self {
+//             sprite: Sprite::default(),
+//             facing: Direction::default(),
+//             texture: value.texture,
+//             transform: Transform::from_scale(Vec3::splat(1.0)).with_translation(Vec3::new(
+//                 value.offset.x,
+//                 value.offset.y,
+//                 2.0,
+//             )),
+//             global_transform: GlobalTransform::default(),
+//             visibility: Visibility::default(),
+//             inherited_visibility: InheritedVisibility::default(),
+//             view_visibility: ViewVisibility::default(),
+//             atlas: TextureAtlas {
+//                 layout: value.texture_atlas_layout,
+//                 index: 3,
+//             },
+//         }
+//     }
+// }
 
-impl From<&NonAnimatedApparel> for NonAnimatedApparelSpriteBundle {
-    fn from(value: &NonAnimatedApparel) -> Self {
-        Self {
-            sprite: Sprite::default(),
-            facing: Direction::default(),
-            texture: value.texture.clone(),
-            transform: Transform::from_scale(Vec3::splat(1.0)).with_translation(Vec3::new(
-                value.offset.x,
-                value.offset.y,
-                2.0,
-            )),
-            global_transform: GlobalTransform::default(),
-            visibility: Visibility::default(),
-            inherited_visibility: InheritedVisibility::default(),
-            view_visibility: ViewVisibility::default(),
-            atlas: TextureAtlas {
-                layout: value.texture_atlas_layout.clone(),
-                index: 3,
-            },
-        }
-    }
-}
+// impl From<&NonAnimatedApparel> for NonAnimatedApparelSpriteBundle {
+//     fn from(value: &NonAnimatedApparel) -> Self {
+//         Self {
+//             sprite: Sprite::default(),
+//             facing: Direction::default(),
+//             texture: value.texture.clone(),
+//             transform: Transform::from_scale(Vec3::splat(1.0)).with_translation(Vec3::new(
+//                 value.offset.x,
+//                 value.offset.y,
+//                 2.0,
+//             )),
+//             global_transform: GlobalTransform::default(),
+//             visibility: Visibility::default(),
+//             inherited_visibility: InheritedVisibility::default(),
+//             view_visibility: ViewVisibility::default(),
+//             atlas: TextureAtlas {
+//                 layout: value.texture_atlas_layout.clone(),
+//                 index: 3,
+//             },
+//         }
+//     }
+// }
 
-#[derive(Component)]
-pub struct Apparel;
+// #[derive(Component)]
+// pub struct Apparel;
 
-#[derive(Clone, Debug)]
-pub struct NonAnimatedApparel {
-    /// The vertical and horizontal offset of the sprite from the center of the parent
-    pub offset: Vec2,
+// #[derive(Clone, Debug)]
+// pub struct NonAnimatedApparel {
+//     /// The vertical and horizontal offset of the sprite from the center of the parent
+//     pub offset: Vec2,
 
-    /// The image representing the sprite in the game
-    pub texture: Handle<Image>,
+//     /// The image representing the sprite in the game
+//     pub texture: Handle<Image>,
 
-    /// The `TextureAtlasLayout` that defines how the different images within the image file should
-    /// be interpreted as a texture atlas.
-    pub texture_atlas_layout: Handle<TextureAtlasLayout>,
+//     /// The `TextureAtlasLayout` that defines how the different images within the image file
+// should     /// be interpreted as a texture atlas.
+//     pub texture_atlas_layout: Handle<TextureAtlasLayout>,
 
-    /// The Entity for which this apparel is attached
-    pub parent_id: Entity,
-}
+//     /// The Entity for which this apparel is attached
+//     pub parent_id: Entity,
+// }
 
-impl NonAnimatedApparel {
-    pub fn new(
-        parent: Entity,
-        offset: Vec2,
-        texture: Handle<Image>,
-        texture_atlas_layout: Handle<TextureAtlasLayout>,
-    ) -> Self {
-        NonAnimatedApparel {
-            offset: offset,
-            parent_id: parent,
-            texture: texture,
-            texture_atlas_layout: texture_atlas_layout,
-        }
-    }
+// impl NonAnimatedApparel {
+//     pub fn new(
+//         parent: Entity,
+//         offset: Vec2,
+//         texture: Handle<Image>,
+//         texture_atlas_layout: Handle<TextureAtlasLayout>,
+//     ) -> Self {
+//         NonAnimatedApparel {
+//             offset: offset,
+//             parent_id: parent,
+//             texture: texture,
+//             texture_atlas_layout: texture_atlas_layout,
+//         }
+//     }
 
-    pub fn spawn(&self, mut commands: Commands) {
-        let hat_bundle = (Apparel, NonAnimatedApparelSpriteBundle::from(self));
-        commands.spawn(hat_bundle).set_parent(self.parent_id);
-    }
-}
+//     pub fn spawn(&self, mut commands: Commands) {
+//         let hat_bundle = (Apparel, NonAnimatedApparelSpriteBundle::from(self));
+//         commands.spawn(hat_bundle).set_parent(self.parent_id);
+//     }
+// }
