@@ -9,6 +9,7 @@ use plugins::{
     },
     splash_screen::{SettleTownLoadingSplashScreenPlugin, SplashScreenWindow},
 };
+use resources::config::SettleTownConfig;
 use states::game_states::GameState;
 
 #[derive(Parser, Debug)]
@@ -23,6 +24,15 @@ struct Args {
     /// Disable the loading splash screen
     #[arg(long)]
     disable_splash_screen: bool,
+
+    /// Add the base configuration file (if it hasn't been added already)
+    /// and exit.
+    #[arg(long)]
+    create_config_file: bool,
+
+    /// Add the base configuration file, overwriting it if it exists.
+    #[arg(long)]
+    overwrite_config_file_with_default: bool,
 }
 
 mod components;
@@ -45,6 +55,8 @@ impl Default for DurationSplashScreenVisible {
 fn main() {
     let args = Args::parse();
 
+    // Create the app and and default plugins before all else because this sets
+    // up logging and other things that are necessary for the rest of the application.
     let mut app = App::new();
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
@@ -54,39 +66,44 @@ fn main() {
         ..default()
     }));
 
-    // if args.disable_splash_screen {
-    //     app.insert_state(GameState::InGameWorld);
-    // }
-
-    // Add the marker component to the default window.
-    app.add_systems(Startup, label_default_window);
-
-    if !args.disable_splash_screen {
-        app.add_plugins(SettleTownLoadingSplashScreenPlugin)
-            .add_systems(
-                Update,
-                transition_from_loading_splash_screen_once_time_has_elapsed
-                    .run_if(in_state(GameState::LoadingSplashScreen)),
-            )
-            .add_systems(
-                OnExit(GameState::LoadingSplashScreen),
-                make_default_window_invisible,
-            );
+    let mut configuration;
+    if args.overwrite_config_file_with_default {
+        configuration = SettleTownConfig::clobber_from_default();
     } else {
-        app.insert_state(GameState::InGameWorld);
-        app.add_systems(
-            Startup,
-            make_default_window_invisible.after(label_default_window),
-        );
+        configuration = SettleTownConfig::create_from_default();
     }
 
-    app.add_plugins(SettleTownGameWorldWindowPlugin {
-        enabled_state: GameState::InGameWorld,
-        _is_fullscreen: false,
-        window_width: DEFAULT_WINDOW_WIDTH as i32,
-        window_height: DEFAULT_WINDOW_HEIGHT as i32,
-    });
-    app.run();
+    if !args.create_config_file && !args.overwrite_config_file_with_default {
+        // Add the marker component to the default window.
+        app.add_systems(Startup, label_default_window);
+
+        if !args.disable_splash_screen {
+            app.add_plugins(SettleTownLoadingSplashScreenPlugin)
+                .add_systems(
+                    Update,
+                    transition_from_loading_splash_screen_once_time_has_elapsed
+                        .run_if(in_state(GameState::LoadingSplashScreen)),
+                )
+                .add_systems(
+                    OnExit(GameState::LoadingSplashScreen),
+                    make_default_window_invisible,
+                );
+        } else {
+            app.insert_state(GameState::InGameWorld);
+            app.add_systems(
+                Startup,
+                make_default_window_invisible.after(label_default_window),
+            );
+        }
+
+        app.add_plugins(SettleTownGameWorldWindowPlugin {
+            enabled_state: GameState::InGameWorld,
+            _is_fullscreen: false,
+            window_width: DEFAULT_WINDOW_WIDTH as i32,
+            window_height: DEFAULT_WINDOW_HEIGHT as i32,
+        });
+        app.run();
+    }
 }
 
 fn transition_from_loading_splash_screen_once_time_has_elapsed(
