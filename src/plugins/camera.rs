@@ -1,7 +1,11 @@
 use bevy::{app::Plugin, prelude::*, render::camera::RenderTarget, window::WindowRef};
 use bevy_state::state::States;
 
-use super::game_world_window::GameWorldWindow;
+use super::game_world_window::GameWorldWindowCreated;
+
+/// An event that is emitted when the camera is setup.
+#[derive(Event)]
+pub struct CameraSetupEvent;
 
 #[derive(Resource)]
 pub struct ViewportWorldSize {
@@ -36,7 +40,8 @@ impl<S: States> Plugin for SettleTownCameraPlugin<S> {
             "Enabling the setup of the camera but only running if in the state: {:?}",
             self.enabled_state
         );
-        app.add_systems(OnEnter(self.enabled_state.clone()), setup_camera);
+        app.add_event::<CameraSetupEvent>()
+            .add_systems(Update, setup_camera);
     }
 }
 
@@ -50,26 +55,25 @@ impl<S: States> Plugin for SettleTownCameraPlugin<S> {
 //     }
 // }
 
-pub fn setup_camera(mut commands: Commands, window_query: Query<Entity, With<GameWorldWindow>>) {
-    info!("Setting up camera for game world");
-    let camera_bundle = Camera2dBundle {
-        camera: Camera {
-            target: RenderTarget::Window(WindowRef::Entity(window_query.single())),
+pub fn setup_camera(
+    mut commands: Commands,
+    mut window_created_event: EventReader<GameWorldWindowCreated>,
+    mut camera_setup_event: EventWriter<CameraSetupEvent>,
+) {
+    for event in window_created_event.read() {
+        info!("Setting up camera for game world");
+        let camera = Camera {
+            target: RenderTarget::Window(WindowRef::Entity(event.window_entity)),
             ..default()
-        },
-        ..default()
-    };
+        };
 
-    // let camera = camera_bundle.clone().camera;
-    // let global_transform = camera_bundle.global_transform;
-    // // The world coordinates are in pixels (1unit = 1px), but this might not always be the case.
-    // // Thus, we get the height and width in world coordinates of the viewport.
-    // let viewport_min_loc = camera
-    //     .ndc_to_world(&global_transform, Vec3::new(-1.0, -1.0, 0.0))
-    //     .unwrap();
-    // let viewport_center_loc = camera
-    //     .ndc_to_world(&global_transform, Vec3::new(0.0, 0.0, 0.0))
-    //     .unwrap();
+        let camera_bundle = Camera2dBundle {
+            camera,
+            ..default()
+        };
 
-    commands.spawn((camera_bundle, OverheadMapCamera));
+        commands.spawn((camera_bundle, OverheadMapCamera));
+
+        camera_setup_event.send(CameraSetupEvent);
+    }
 }

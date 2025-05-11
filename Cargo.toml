@@ -12,6 +12,7 @@ bevy_state = "0.14.2"
 bevy-inspector-egui = "0.27.0"
 # bevy_animations = "0.7.0"
 bevy_ecs_tilemap = "0.14.0"
+clap = { version = "4.5.1", features = ["derive"] }
 dyn-clone = "1.0.17"
 mapgen = "0.4"
 rand = "0.8.5"

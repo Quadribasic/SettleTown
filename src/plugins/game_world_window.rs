@@ -1,4 +1,5 @@
 use bevy::{app::Plugin, prelude::*};
+use bevy_state::state::{OnTransition, States};
 
 use super::{
     animation::SettleTownSpriteAnimatorPlugin, camera::SettleTownCameraPlugin,
@@ -19,6 +20,12 @@ const DEFAULT_LAYER_TILE_WIDTH: usize = 320;
 /// The default tile height for layers, in device pixels.
 const DEFAULT_LAYER_TILE_HEIGHT: usize = 320;
 
+/// An event that is emitted when the game world window is created.
+#[derive(Event)]
+pub struct GameWorldWindowCreated {
+    pub window_entity: Entity,
+}
+
 /// A marker component for the game world window.
 #[derive(Component)]
 pub struct GameWorldWindow;
@@ -30,47 +37,30 @@ pub struct SettleTownGameWorldWindowPlugin<S: States> {
     pub window_height: i32,
 }
 
-// impl SettleTownGameWorldWindowPlugin {
-// fn make_game_world_window_visible(mut window: Query<&mut Window>, frames: Res<FrameCount>) {
-//     // The delay may be different for your app or system.
-//     if frames.0 == 3 {
-//         // At this point the gpu is ready to show the app so we can make the window visible.
-//         // Alternatively, you could toggle the visibility in Startup.
-//         // It will work, but it will have one white frame before it starts rendering
-//         window.single_mut().visible = true;
-//     }
-// }
-// }
-
-// impl<S: States> Default for SettleTownGameWorldWindowPlugin<S> {
-//     fn default() -> Self {
-//         Self {
-//             is_fullscreen: Default::default(),
-//             window_width: DEFAULT_WINDOW_WIDTH,
-//             window_height: DEFAULT_WINDOW_HEIGHT,
-//         }
-//     }
-// }
-
 impl<S: States> Plugin for SettleTownGameWorldWindowPlugin<S> {
     fn build(&self, app: &mut bevy::app::App) {
+        app.add_event::<GameWorldWindowCreated>().add_systems(
+            OnEnter(self.enabled_state.clone()),
+            create_game_world_window,
+        );
+
         app.add_plugins(SettleTownCameraPlugin {
             width: self.window_width as f32,
             height: self.window_height as f32,
             enabled_state: self.enabled_state.clone(),
-        })
-        .add_plugins(SettleTownLayerPlugin::new(
+        });
+        app.add_plugins(SettleTownLayerPlugin::new(
             DEFAULT_LAYER_TILE_WIDTH,
             DEFAULT_LAYER_TILE_HEIGHT,
             self.enabled_state.clone(),
-        ))
-        .add_plugins(SettleTownPlayerCharacterPlugin {
+        ));
+        app.add_plugins(SettleTownPlayerCharacterPlugin {
             enabled_state: GameState::InGameWorld,
-        })
-        .add_plugins(SettleTownInputPlugin {
+        });
+        app.add_plugins(SettleTownInputPlugin {
             enabled_state: GameState::InGameWorld,
-        })
-        .add_plugins(SettleTownSpriteAnimatorPlugin {
+        });
+        app.add_plugins(SettleTownSpriteAnimatorPlugin {
             _enabled_state: GameState::InGameWorld,
         });
         // The world inspector plugin allows us to take a look at the world
@@ -96,4 +86,25 @@ impl<S: States> Plugin for SettleTownGameWorldWindowPlugin<S> {
         //     show_bounding_boxes: false,
         // }))
     }
+}
+
+fn create_game_world_window(
+    mut commands: Commands,
+    mut message_bus: EventWriter<GameWorldWindowCreated>,
+) {
+    // Create the game world window
+    info!("Creating game world window");
+    let window_entity = commands
+        .spawn((
+            Window {
+                title: "SettleTown".into(),
+                resolution: (DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT).into(),
+                resizable: false,
+                ..default()
+            },
+            GameWorldWindow,
+        ))
+        .id();
+
+    message_bus.send(GameWorldWindowCreated { window_entity });
 }

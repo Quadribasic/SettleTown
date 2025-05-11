@@ -129,5 +129,25 @@ impl Plugin for SettleTownLoadingSplashScreenPlugin {
                 Update,
                 SettleTownLoadingSplashScreenPlugin::check_texture_loaded,
             );
+        app.add_systems(
+            OnExit(GameState::LoadingSplashScreen),
+            despawn_splash_screen,
+        );
+    }
+}
+
+fn despawn_splash_screen(
+    mut commands: Commands,
+    splash_screen_window: Query<Entity, With<SplashScreenWindow>>,
+) {
+    // Despawn the splash screen window
+    if let Ok(window_entity) = splash_screen_window.get_single() {
+        info!(
+            "Despawning splash screen window (Entity: {:?})",
+            window_entity
+        );
+        commands.entity(window_entity).despawn();
+    } else {
+        error!("Splash screen window was not found");
     }
 }

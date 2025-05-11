@@ -2,10 +2,13 @@ use bevy::prelude::*;
 
 use super::{
     animation::{execute_animations_indefinite, AnimationConfig},
-    camera::{OverheadMapCamera, ViewportWorldSize},
+    camera::{CameraSetupEvent, OverheadMapCamera, ViewportWorldSize},
     player_character::{PlayerCharacter, PLAYER_CHARACTER_RUN_FPS, PLAYER_CHARACTER_WALK_FPS},
 };
-use crate::{components::sprites::Direction, resources::world::WorldCoordinates};
+use crate::{
+    components::sprites::Direction, resources::world::WorldCoordinates,
+    states::game_states::GameState,
+};
 
 const PLAYER_MOVEMENT_SPEED: f32 = 1.0;
 
@@ -24,6 +27,16 @@ type PlayerQuery<'a> = (
     &'a mut AnimationConfig,
 );
 
+/// A resource that tracks whether or not the input system is active. When we receive a
+/// `CameraSetupEvent`, we'll set this to `true`, which will enable the keyboard input
+/// system.
+#[derive(Resource, Default, PartialEq)]
+pub struct InputSystemState {
+    pub is_active: bool,
+}
+
+// XXX_jwir3: This should be broken out into several systems. The function is too long and
+// complex.
 fn keyboard_input_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut query_camera: Query<CameraQuery, (With<OverheadMapCamera>, Without<PlayerCharacter>)>,
@@ -150,9 +163,10 @@ fn keyboard_input_system(
     player_char.3.last_sprite_index = player_char.3.first_sprite_index + 8;
 
     // Update the camera
-    // Only move the camera until the left edge aligns with the left edge of the world, the right
-    // edge aligns with the right edge of the world, the top edge aligns with the top edge of
-    // the world, or the bottom edge aligns with the bottom edge of the world.
+    // Only move the camera until the left edge aligns with the left edge of the world, the
+    // right edge aligns with the right edge of the world, the top edge aligns with the
+    // top edge of the world, or the bottom edge aligns with the bottom edge of the
+    // world.
     let mut camera = query_camera.single_mut();
 
     let viewport_half_width = viewport_size.width / 2.0;
@@ -212,18 +226,45 @@ pub struct SettleTownInputPlugin<S: States> {
     pub enabled_state: S,
 }
 
-impl<S: States> Plugin for SettleTownInputPlugin<S> {
-    fn build(&self, app: &mut App) {
-        app.add_systems(
-            Update,
-            keyboard_input_system
-                .before(execute_animations_indefinite)
-                .run_if(in_state(self.enabled_state.clone())),
-        );
-
-        // app.add_systems(Update, update_child_directions.after(keyboard_input_system));
+/// A system that looks for the `CameraSetupEvent` and sets the `InputSystemState` to `true`
+/// when it is received.
+fn setup_input_system(
+    mut input_state: ResMut<InputSystemState>,
+    mut camera_setup_events: EventReader<CameraSetupEvent>,
+) {
+    for _ in camera_setup_events.read() {
+        input_state.is_active = true;
     }
 }
+
+impl<S: States> Plugin for SettleTownInputPlugin<S> {
+    fn build(&self, app: &mut App) {
+        app.init_resource::<InputSystemState>()
+            .add_systems(Update, setup_input_system)
+            .add_systems(
+                Update,
+                keyboard_input_system
+                    .before(execute_animations_indefinite)
+                    .run_if(in_state(self.enabled_state.clone()))
+                    .run_if(resource_exists_and_equals(InputSystemState {
+                        is_active: true,
+                    })),
+            );
+    }
+}
+
+// fn enable_keyboard_input_system(
+//     &self,
+//     app: &mut App,
+//     mut camera_setup_event: EventReader<CameraSetupEvent>,
+// ) {
+//     app.add_systems(
+//         Update,
+//         keyboard_input_system
+//             .before(execute_animations_indefinite)
+//             .run_if(in_state(self.enabled_state.clone())),
+//     );
+// }
 
 // fn update_child_directions(
 //     parent_query: Query<&Direction, With<PlayerCharacter>>,

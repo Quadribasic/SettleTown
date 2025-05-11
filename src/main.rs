@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use bevy::{prelude::*, window::WindowPlugin};
+use clap::Parser;
 use plugins::{
     game_world_window::{
         GameWorldWindow, SettleTownGameWorldWindowPlugin, DEFAULT_WINDOW_HEIGHT,
@@ -9,6 +10,20 @@ use plugins::{
     splash_screen::{SettleTownLoadingSplashScreenPlugin, SplashScreenWindow},
 };
 use states::game_states::GameState;
+
+#[derive(Parser, Debug)]
+#[command(
+    author = "Quadribasic Companies, LLC",
+    version = "0.1.0",
+    about = "SettleTown",
+    long_about = "SettleTown is a game about settling a town based in the mythological American \
+                  Old West. It is a work in progress and not all features are available yet."
+)]
+struct Args {
+    /// Disable the loading splash screen
+    #[arg(long)]
+    disable_splash_screen: bool,
+}
 
 mod components;
 mod plugins;
@@ -28,40 +43,50 @@ impl Default for DurationSplashScreenVisible {
 }
 
 fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                visible: false,
-                ..default()
-            }),
+    let args = Args::parse();
+
+    let mut app = App::new();
+    app.add_plugins(DefaultPlugins.set(WindowPlugin {
+        primary_window: Some(Window {
+            visible: false,
             ..default()
-        }))
-        // Add the marker component to the default window.
-        .add_systems(
+        }),
+        ..default()
+    }));
+
+    // if args.disable_splash_screen {
+    //     app.insert_state(GameState::InGameWorld);
+    // }
+
+    // Add the marker component to the default window.
+    app.add_systems(Startup, label_default_window);
+
+    if !args.disable_splash_screen {
+        app.add_plugins(SettleTownLoadingSplashScreenPlugin)
+            .add_systems(
+                Update,
+                transition_from_loading_splash_screen_once_time_has_elapsed
+                    .run_if(in_state(GameState::LoadingSplashScreen)),
+            )
+            .add_systems(
+                OnExit(GameState::LoadingSplashScreen),
+                make_default_window_invisible,
+            );
+    } else {
+        app.insert_state(GameState::InGameWorld);
+        app.add_systems(
             Startup,
-            |mut commands: Commands, window: Query<Entity, Added<Window>>| {
-                if let Ok(window_entity) = window.get_single() {
-                    commands.entity(window_entity).insert(DefaultWindow);
-                }
-            },
-        )
-        .add_plugins(SettleTownLoadingSplashScreenPlugin)
-        .add_systems(
-            Update,
-            transition_from_loading_splash_screen_once_time_has_elapsed
-                .run_if(in_state(GameState::LoadingSplashScreen)),
-        )
-        .add_systems(
-            OnExit(GameState::LoadingSplashScreen),
-            make_main_window_invisible,
-        )
-        .add_plugins(SettleTownGameWorldWindowPlugin {
-            enabled_state: GameState::InGameWorld,
-            _is_fullscreen: false,
-            window_width: DEFAULT_WINDOW_WIDTH as i32,
-            window_height: DEFAULT_WINDOW_HEIGHT as i32,
-        })
-        .run();
+            make_default_window_invisible.after(label_default_window),
+        );
+    }
+
+    app.add_plugins(SettleTownGameWorldWindowPlugin {
+        enabled_state: GameState::InGameWorld,
+        _is_fullscreen: false,
+        window_width: DEFAULT_WINDOW_WIDTH as i32,
+        window_height: DEFAULT_WINDOW_HEIGHT as i32,
+    });
+    app.run();
 }
 
 fn transition_from_loading_splash_screen_once_time_has_elapsed(
@@ -81,32 +106,21 @@ fn transition_from_loading_splash_screen_once_time_has_elapsed(
     }
 }
 
-fn make_main_window_invisible(
+fn label_default_window(mut commands: Commands, window: Query<Entity, Added<Window>>) {
+    if let Ok(window_entity) = window.get_single() {
+        commands.entity(window_entity).insert(DefaultWindow);
+    }
+}
+
+fn make_default_window_invisible(
     mut commands: Commands,
     default_window: Query<Entity, With<DefaultWindow>>,
-    splash_screen_window: Query<Entity, With<SplashScreenWindow>>,
 ) {
-    // Create the game world window first
-    info!("Creating game world window");
-    commands.spawn((
-        Window {
-            title: "SettleTown".into(),
-            resolution: (1408.0, 768.0).into(),
-            resizable: false,
-            ..default()
-        },
-        GameWorldWindow,
-    ));
-
     // Then despawn the default window
     info!("Despawning default window");
-    commands.entity(default_window.single()).despawn();
-
-    // Finally despawn the splash screen window
-    let window_entity = splash_screen_window.single();
-    info!(
-        "Despawning splash screen window (Entity: {:?})",
-        window_entity
-    );
-    commands.entity(window_entity).despawn();
+    if let Ok(default_window_entity) = default_window.get_single() {
+        commands.entity(default_window_entity).despawn();
+    } else {
+        info!("No default window was detected, skipping despawn")
+    }
 }
