@@ -9,18 +9,18 @@ use serde::Deserialize;
 #[derive(Debug, Resource)]
 pub struct SettleTownConfig {
     config_dir: PathBuf,
-    base_config: BaseConfig,
+    pub base_config: BaseConfig,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename = "config")]
-struct BaseConfig {
+pub struct BaseConfig {
     pub world: WorldConfig,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename = "world")]
-struct WorldConfig {
+pub struct WorldConfig {
     pub enable_aabbs: bool,
 }
 
@@ -88,7 +88,7 @@ impl SettleTownConfig {
     pub fn parse_config_file(config_dir: PathBuf, config_file: &PathBuf) -> Self {
         // Parse the configuration file
         let config =
-            std::fs::read_to_string(&config_file).expect("Failed to read configuration file");
+            std::fs::read_to_string(config_file).expect("Failed to read configuration file");
         let config: BaseConfig =
             toml::from_str(&config).expect("Failed to parse configuration file");
 

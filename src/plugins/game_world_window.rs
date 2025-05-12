@@ -1,5 +1,5 @@
 use bevy::{app::Plugin, prelude::*};
-use bevy_state::state::{OnTransition, States};
+use bevy_state::state::States;
 
 use super::{
     animation::SettleTownSpriteAnimatorPlugin, camera::SettleTownCameraPlugin,

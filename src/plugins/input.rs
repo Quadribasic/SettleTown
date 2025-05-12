@@ -5,10 +5,7 @@ use super::{
     camera::{CameraSetupEvent, OverheadMapCamera, ViewportWorldSize},
     player_character::{PlayerCharacter, PLAYER_CHARACTER_RUN_FPS, PLAYER_CHARACTER_WALK_FPS},
 };
-use crate::{
-    components::sprites::Direction, resources::world::WorldCoordinates,
-    states::game_states::GameState,
-};
+use crate::{components::sprites::Direction, resources::world::WorldCoordinates};
 
 const PLAYER_MOVEMENT_SPEED: f32 = 1.0;
 

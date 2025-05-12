@@ -4,10 +4,9 @@ use bevy::{prelude::*, window::WindowPlugin};
 use clap::Parser;
 use plugins::{
     game_world_window::{
-        GameWorldWindow, SettleTownGameWorldWindowPlugin, DEFAULT_WINDOW_HEIGHT,
-        DEFAULT_WINDOW_WIDTH,
+        SettleTownGameWorldWindowPlugin, DEFAULT_WINDOW_HEIGHT, DEFAULT_WINDOW_WIDTH,
     },
-    splash_screen::{SettleTownLoadingSplashScreenPlugin, SplashScreenWindow},
+    splash_screen::SettleTownLoadingSplashScreenPlugin,
 };
 use resources::config::SettleTownConfig;
 use states::game_states::GameState;
@@ -66,11 +65,10 @@ fn main() {
         ..default()
     }));
 
-    let mut configuration;
     if args.overwrite_config_file_with_default {
-        configuration = SettleTownConfig::clobber_from_default();
+        SettleTownConfig::clobber_from_default();
     } else {
-        configuration = SettleTownConfig::create_from_default();
+        SettleTownConfig::create_from_default();
     }
 
     if !args.create_config_file && !args.overwrite_config_file_with_default {
