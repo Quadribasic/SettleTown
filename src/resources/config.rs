@@ -1,6 +1,7 @@
 use std::{env, path::PathBuf};
 
 use bevy::{log::info, prelude::Resource};
+use cargo_metadata::MetadataCommand;
 use directories::ProjectDirs;
 use serde::Deserialize;
 
@@ -8,7 +9,7 @@ use serde::Deserialize;
 /// Serialized and deserialized from a config file using serde in toml format.
 #[derive(Debug, Resource)]
 pub struct SettleTownConfig {
-    config_dir: PathBuf,
+    _config_dir: PathBuf,
     pub base_config: BaseConfig,
 }
 
@@ -68,9 +69,29 @@ impl SettleTownConfig {
     }
 
     pub fn get_config_directory() -> PathBuf {
+        let metadata = MetadataCommand::new()
+            .exec()
+            .expect("Failed to read Cargo.toml metadata");
+
+        let package = metadata.root_package().expect("Failed to get root package");
+
+        let qualifier = package
+            .metadata
+            .get("settletown")
+            .and_then(|s| s.get("qualifier"))
+            .and_then(|q| q.as_str())
+            .expect("Failed to get qualifier from Cargo.toml");
+
+        let organization = package
+            .metadata
+            .get("settletown")
+            .and_then(|s| s.get("organization"))
+            .and_then(|o| o.as_str())
+            .expect("Failed to get organization from Cargo.toml");
+
         let project_dirs = ProjectDirs::from(
-            &env::var("CARGO_PKG_QUALIFIER").unwrap_or_else(|_| "com".to_string()),
-            &env::var("CARGO_PKG_ORGANIZATION").unwrap_or_else(|_| "quadribasic".to_string()),
+            qualifier,
+            organization,
             &env::var("CARGO_PKG_NAME").unwrap_or_else(|_| "SettleTown".to_string()),
         )
         .expect("Failed to get project directories");
@@ -95,7 +116,7 @@ impl SettleTownConfig {
         info!("Found configuration: {:?}", config);
 
         Self {
-            config_dir,
+            _config_dir: config_dir,
             base_config: config,
         }
     }

@@ -65,12 +65,17 @@ fn main() {
         ..default()
     }));
 
-    if args.overwrite_config_file_with_default {
-        SettleTownConfig::clobber_from_default();
+    let configuration = if args.overwrite_config_file_with_default {
+        SettleTownConfig::clobber_from_default()
     } else {
-        SettleTownConfig::create_from_default();
-    }
+        SettleTownConfig::create_from_default()
+    };
 
+    // Insert the configuration resource into the app
+    app.insert_resource(configuration);
+
+    // This just controls whether we want to exit after clobbering or initializing the configuration
+    // file.
     if !args.create_config_file && !args.overwrite_config_file_with_default {
         // Add the marker component to the default window.
         app.add_systems(Startup, label_default_window);

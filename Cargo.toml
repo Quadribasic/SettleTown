@@ -2,6 +2,8 @@
 name = "SettleTown"
 version = "0.0.1"
 edition = "2021"
+
+[package.metadata.settletown]
 qualifier = "com"
 organization = "quadribasic"
 
@@ -14,6 +16,7 @@ bevy_state = "0.14.2"
 bevy-inspector-egui = "0.27.0"
 # bevy_animations = "0.7.0"
 bevy_ecs_tilemap = "0.14.0"
+cargo_metadata = "0.18"
 clap = { version = "4.5.1", features = ["derive"] }
 directories = "5.0"
 dyn-clone = "1.0.17"

@@ -1,2 +1,2 @@
 [world]
-enable_aabbs = false
+enable_aabbs = true

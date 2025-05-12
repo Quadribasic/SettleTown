@@ -11,6 +11,7 @@ use bevy_state::state::States;
 use crate::{
     components::sprites::{Direction, DirectionalSprite, DirectionalSpriteBundle},
     plugins::animation::AnimationConfig,
+    resources::config::SettleTownConfig,
 };
 
 pub const PLAYER_CHARACTER_WALK_FPS: u8 = 10;
@@ -26,6 +27,7 @@ impl<S: States> Plugin for SettleTownPlayerCharacterPlugin<S> {
             OnEnter(self.enabled_state.clone()),
             spawn_player_character_entity,
         );
+        app.add_systems(Update, draw_player_character_aabb);
     }
 }
 
@@ -94,4 +96,23 @@ fn spawn_player_character_entity(
     //     texture_atlas_layout_hat,
     // );
     // hat_apparel.spawn(commands);
+}
+
+fn draw_player_character_aabb(
+    mut gizmos: Gizmos,
+    query: Query<&Transform, With<PlayerCharacter>>,
+    config: Res<SettleTownConfig>,
+) {
+    // If we don't have AABBs enabled, then don't draw them.
+    if !config.base_config.world.enable_aabbs {
+        return;
+    }
+
+    for transform in query.iter() {
+        // The player sprite is 64x64, centered at its translation
+        let size = Vec2::new(64.0, 64.0);
+        let min = transform.translation.truncate() - size / 2.0;
+        // let max = transform.translation.truncate() + size / 2.0;
+        gizmos.rect_2d(min + size / 2.0, 0.0, size, Color::srgb(0.0, 1.0, 0.0));
+    }
 }
