@@ -191,15 +191,15 @@ impl Plugin for SettleTownLoadingSplashScreenPlugin {
 fn despawn_splash_screen(
     mut commands: Commands,
     splash_screen_window: Query<Entity, With<SplashScreenWindow>>,
-    text_entity: Query<Entity, With<SplashScreenText>>,
 ) {
     // Despawn the splash screen text
-    if let Ok(text_entity) = text_entity.get_single() {
-        info!("Despawning splash screen text (Entity: {:?})", text_entity);
-        commands.entity(text_entity).despawn();
-    } else {
-        error!("Splash screen text was not found");
-    }
+    // XXX_jwir3: This code can be used to despawn and replace the splash screen text.
+    // if let Ok(text_entity) = text_entity.get_single() {
+    //     info!("Despawning splash screen text (Entity: {:?})", text_entity);
+    //     commands.entity(text_entity).despawn();
+    // } else {
+    //     error!("Splash screen text was not found");
+    // }
 
     // Despawn the splash screen window
     if let Ok(window_entity) = splash_screen_window.get_single() {
@@ -207,6 +207,11 @@ fn despawn_splash_screen(
             "Despawning splash screen window (Entity: {:?})",
             window_entity
         );
+
+        // Despawn all children of this entity
+        commands.entity(window_entity).clear_children();
+
+        // Despawn the window entity
         commands.entity(window_entity).despawn();
     } else {
         error!("Splash screen window was not found");
