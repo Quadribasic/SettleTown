@@ -10,3 +10,9 @@ pub enum GameState {
     // MainMenu,
     InGameWorld,
 }
+
+#[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
+pub enum LoadingState {
+    #[default]
+    Loading,
+}
