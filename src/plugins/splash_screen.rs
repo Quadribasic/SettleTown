@@ -24,6 +24,10 @@ pub struct SplashScreenText;
 #[derive(Component)]
 pub struct SplashScreenWindow;
 
+/// An event indicating that the lower text on the splash screen should be changed.
+#[derive(Event)]
+pub struct SplashScreenTextUpdateEvent(pub String);
+
 pub struct SettleTownLoadingSplashScreenPlugin;
 
 impl SettleTownLoadingSplashScreenPlugin {
@@ -128,7 +132,7 @@ impl SettleTownLoadingSplashScreenPlugin {
                 Text2dBundle {
                     text: Text {
                         sections: vec![TextSection::new(
-                            "Loading...",
+                            "Reticulating splines...",
                             TextStyle {
                                 font_size: 24.0,
                                 color: Color::WHITE,
@@ -144,7 +148,8 @@ impl SettleTownLoadingSplashScreenPlugin {
                     },
                     // ensure the text is drawn on top of the box
                     // transform: Transform::from_xyz(-150.0, -200.0, 1.0),
-                    global_transform: GlobalTransform::from_xyz(-150.0, -200.0, 1.0),
+                    global_transform: GlobalTransform::from_xyz(-240.0, -200.0, 1.0),
+                    text_anchor: bevy::sprite::Anchor::BottomLeft,
                     ..default()
                 },
             ))
@@ -176,15 +181,30 @@ impl Plugin for SettleTownLoadingSplashScreenPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.init_state::<GameState>()
             .insert_resource(ClearColor(Color::NONE))
+            .add_event::<SplashScreenTextUpdateEvent>()
             .add_systems(Startup, SettleTownLoadingSplashScreenPlugin::setup)
             .add_systems(
                 Update,
-                SettleTownLoadingSplashScreenPlugin::check_texture_loaded,
+                (
+                    SettleTownLoadingSplashScreenPlugin::check_texture_loaded,
+                    update_splash_screen_text,
+                ),
             );
         app.add_systems(
             OnExit(GameState::LoadingSplashScreen),
             despawn_splash_screen,
         );
+    }
+}
+
+fn update_splash_screen_text(
+    mut text_events: EventReader<SplashScreenTextUpdateEvent>,
+    mut text_query: Query<&mut Text, With<SplashScreenText>>,
+) {
+    for event in text_events.read() {
+        if let Ok(mut text) = text_query.get_single_mut() {
+            text.sections[0].value = event.0.clone();
+        }
     }
 }
 

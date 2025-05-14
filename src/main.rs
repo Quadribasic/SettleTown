@@ -6,7 +6,7 @@ use plugins::{
     game_world_window::{
         SettleTownGameWorldWindowPlugin, DEFAULT_WINDOW_HEIGHT, DEFAULT_WINDOW_WIDTH,
     },
-    splash_screen::SettleTownLoadingSplashScreenPlugin,
+    splash_screen::{SettleTownLoadingSplashScreenPlugin, SplashScreenTextUpdateEvent},
 };
 use resources::config::SettleTownConfig;
 use states::game_states::GameState;
@@ -51,6 +51,14 @@ impl Default for DurationSplashScreenVisible {
     }
 }
 
+struct DurationLoadingVisible(Duration);
+
+impl Default for DurationLoadingVisible {
+    fn default() -> Self {
+        DurationLoadingVisible(Duration::from_secs(2))
+    }
+}
+
 fn main() {
     let args = Args::parse();
 
@@ -88,6 +96,11 @@ fn main() {
                         .run_if(in_state(GameState::LoadingSplashScreen)),
                 )
                 .add_systems(
+                    Update,
+                    display_some_other_text_on_splash_screen
+                        .run_if(in_state(GameState::LoadingSplashScreen)),
+                )
+                .add_systems(
                     OnExit(GameState::LoadingSplashScreen),
                     make_default_window_invisible,
                 );
@@ -106,6 +119,20 @@ fn main() {
             window_height: DEFAULT_WINDOW_HEIGHT as i32,
         });
         app.run();
+    }
+}
+
+fn display_some_other_text_on_splash_screen(
+    mut commands: Commands,
+    length: Local<DurationLoadingVisible>,
+    time: Res<Time<Fixed>>,
+) {
+    if time.elapsed_seconds() >= length.0.as_secs() as f32 {
+        commands.add(|world: &mut World| {
+            world.send_event(SplashScreenTextUpdateEvent(
+                "Building the World...".to_string(),
+            ));
+        });
     }
 }
 
