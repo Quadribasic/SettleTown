@@ -52,18 +52,16 @@ impl<S: States> Plugin for SettleTownSpriteAnimatorPlugin<S> {
         app.add_systems(
             Update,
             (
-                (trigger_animation::<DirectionalSprite>)
-                    // .run_if(in_state(self.enabled_state.clone()))
-                    .run_if(
-                        input_just_pressed(KeyCode::ArrowRight)
-                            .or_else(input_just_pressed(KeyCode::ArrowLeft))
-                            .or_else(input_just_pressed(KeyCode::ArrowUp))
-                            .or_else(input_just_pressed(KeyCode::ArrowDown))
-                            .or_else(input_just_pressed(KeyCode::KeyW))
-                            .or_else(input_just_pressed(KeyCode::KeyA))
-                            .or_else(input_just_pressed(KeyCode::KeyS))
-                            .or_else(input_just_pressed(KeyCode::KeyD)),
-                    ),
+                trigger_animation::<DirectionalSprite>.run_if(
+                    input_just_pressed(KeyCode::ArrowRight)
+                        .or(input_just_pressed(KeyCode::ArrowLeft))
+                        .or(input_just_pressed(KeyCode::ArrowUp))
+                        .or(input_just_pressed(KeyCode::ArrowDown))
+                        .or(input_just_pressed(KeyCode::KeyW))
+                        .or(input_just_pressed(KeyCode::KeyA))
+                        .or(input_just_pressed(KeyCode::KeyS))
+                        .or(input_just_pressed(KeyCode::KeyD)),
+                ),
                 // execute_animations_indefinite.run_if(in_state(self.enabled_state.clone())),
                 execute_animations_indefinite,
             )
@@ -75,7 +73,7 @@ impl<S: States> Plugin for SettleTownSpriteAnimatorPlugin<S> {
 
 pub fn execute_animations_indefinite(
     time: Res<Time>,
-    mut query: Query<(&mut AnimationConfig, &mut TextureAtlas), With<DirectionalSprite>>,
+    mut query: Query<(&mut AnimationConfig, &mut Sprite), With<DirectionalSprite>>,
     current_state: Res<State<GameState>>,
 ) {
     // XXX_jwir3: This is a bit of a hack, but if we don't do this and instead use .run_if
@@ -87,7 +85,7 @@ pub fn execute_animations_indefinite(
 
     // This loops through all the frames in the texture atlas, from first to last frame
     // as defined in the AnimationConfig.
-    for (mut config, mut atlas) in &mut query {
+    for (mut config, mut sprite) in &mut query {
         if config.should_run_animation {
             // info!(
             //     "Running animation for frames: {:?} through {:?}",
@@ -98,33 +96,51 @@ pub fn execute_animations_indefinite(
             config.frame_timer.tick(time.delta());
 
             // If it has been displayed for the user-defined amount of time (fps)...
-            if config.frame_timer.just_finished() {
-                if atlas.index == config.last_sprite_index {
-                    // ...and it IS the last frame, then we move back to the first frame
-                    atlas.index = config.first_sprite_index;
+            // if config.frame_timer.just_finished() {
+            //     if let Some(atlas) = &mut sprite.texture_atlas {
+            //         if atlas.index == config.last_sprite_index {
+            //             // ...and it IS the last frame, then we move back to the first frame and stop.
+            //             atlas.index = config.first_sprite_index;
+            //         } else {
+            //             // ...and it is NOT the last frame, then we move to the next frame...
+            //             atlas.index += 1;
+            //             // ...and reset the frame timer to start counting all over again
+            //             config.frame_timer = AnimationConfig::timer_from_fps(config.fps);
+            //         }
+            //     }
+            // }
 
-                    // ... and reset the frame timer.
-                    config.frame_timer = AnimationConfig::timer_from_fps(config.fps);
-                } else {
-                    info!(
-                        "Updating frame from {:?} to {:?}",
-                        atlas.index,
-                        atlas.index + 1
-                    );
-                    // ...and it is NOT the last frame, then we move to the next frame...
-                    atlas.index += 1;
-                    // ...and reset the frame timer to start counting all over again
-                    config.frame_timer = AnimationConfig::timer_from_fps(config.fps);
+            // If it has been displayed for the user-defined amount of time (fps)...
+            if config.frame_timer.just_finished() {
+                if let Some(atlas) = &mut sprite.texture_atlas {
+                    if atlas.index == config.last_sprite_index {
+                        // ...and it IS the last frame, then we move back to the first frame
+                        atlas.index = config.first_sprite_index;
+
+                        // ... and reset the frame timer.
+                        config.frame_timer = AnimationConfig::timer_from_fps(config.fps);
+                    } else {
+                        info!(
+                            "Updating frame from {:?} to {:?}",
+                            atlas.index,
+                            atlas.index + 1
+                        );
+                        // ...and it is NOT the last frame, then we move to the next frame...
+                        atlas.index += 1;
+                        // ...and reset the frame timer to start counting all over again
+                        config.frame_timer = AnimationConfig::timer_from_fps(config.fps);
+                    }
                 }
             }
-        } else {
+        } else if let Some(atlas) = &mut sprite.texture_atlas {
             atlas.index = config.first_sprite_index;
         }
     }
 }
 
+// fn trigger_animation<S: Component>(mut animation: Single<&mut AnimationConfig, With<S>>) {
 fn trigger_animation<S: Component>(
-    mut query: Query<(&mut AnimationConfig, &mut Direction, &mut TextureAtlas), With<S>>,
+    mut query: Query<(&mut AnimationConfig, &mut Direction, &mut Sprite), With<S>>,
     current_state: Res<State<GameState>>,
 ) {
     if *current_state.get() != GameState::InGameWorld {
@@ -140,7 +156,12 @@ fn trigger_animation<S: Component>(
     animation.0.last_sprite_index = animation.0.first_sprite_index + 8;
 
     // Set the current frame to the first frame of the animation
-    animation.2.index = animation.0.first_sprite_index;
+    if let Some(texture_atlas) = animation.2.texture_atlas.clone() {
+        animation.2.texture_atlas = Some(TextureAtlas {
+            index: animation.0.first_sprite_index,
+            layout: texture_atlas.layout,
+        });
+    }
 
     animation.0.frame_timer = AnimationConfig::timer_from_fps(animation.0.fps);
     animation.0.should_run_animation = true;

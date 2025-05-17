@@ -4,9 +4,10 @@ use bevy::{
     app::Plugin,
     prelude::*,
     render::camera::RenderTarget,
-    text::{BreakLineOn, Text2dBounds},
+    sprite::Anchor,
     window::{
-        Cursor, InternalWindowState, Window, WindowPosition, WindowRef, WindowResizeConstraints,
+        CursorOptions, InternalWindowState, Window, WindowPosition, WindowRef,
+        WindowResizeConstraints,
     },
 };
 
@@ -32,6 +33,7 @@ pub struct SettleTownLoadingSplashScreenPlugin;
 
 impl SettleTownLoadingSplashScreenPlugin {
     fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+        info!("Setting up the splash screen");
         // Create the splash screen window
         let window = Window {
             title: "SettleTown Splash Screen".into(),
@@ -51,7 +53,7 @@ impl SettleTownLoadingSplashScreenPlugin {
                 ..Default::default()
             },
             window_level: bevy::window::WindowLevel::Normal,
-            cursor: Cursor::default(),
+            cursor_options: CursorOptions::default(),
             internal: InternalWindowState::default(),
             ime_enabled: false,
             prevent_default_event_handling: false,
@@ -83,38 +85,37 @@ impl SettleTownLoadingSplashScreenPlugin {
             .id();
 
         // Setup the camera and sprite as children of the window
-        let camera_bundle = Camera2dBundle {
-            camera: Camera {
+        let camera_bundle = (
+            Camera2d,
+            Camera {
                 target: RenderTarget::Window(WindowRef::Entity(window_entity)),
                 ..default()
             },
-            transform: Transform::from_xyz(0.0, 0.0, 0.0),
-            ..default()
-        };
+        );
+
         let camera_entity = commands.spawn(camera_bundle).id();
         commands.entity(window_entity).add_child(camera_entity);
 
         // Add UI camera
-        let ui_camera = commands
-            .spawn(Camera2dBundle {
-                camera: Camera {
-                    target: RenderTarget::Window(WindowRef::Entity(window_entity)),
-                    order: 1,
-                    ..default()
-                },
+        let ui_camera_bundle = (
+            Camera2d,
+            Camera {
+                target: RenderTarget::Window(WindowRef::Entity(window_entity)),
+                order: 1,
                 ..default()
-            })
-            .id();
-        commands.entity(window_entity).add_child(ui_camera);
+            },
+        );
+        let ui_camera_entity = commands.spawn(ui_camera_bundle).id();
+
+        commands.entity(window_entity).add_child(ui_camera_entity);
 
         // Load the texture and wait for it to be ready
         let texture_handle = asset_server.load("custom/screens/SplashScreenSunset.png");
 
         let sprite_entity = commands
             .spawn((
-                SpriteBundle {
-                    texture: texture_handle.clone(),
-                    transform: Transform::from_scale(Vec3::splat(1.0)),
+                Sprite {
+                    image: texture_handle.clone(),
                     ..default()
                 },
                 SplashScreenSprite,
@@ -123,35 +124,18 @@ impl SettleTownLoadingSplashScreenPlugin {
         commands.entity(window_entity).add_child(sprite_entity);
 
         // Add loading text at the bottom of the splash screen
-        let text_box_size: Vec2 = Vec2::new(512.0, 512.0);
-
-        // XXX_jwir3: We need to despawn this when the window goes away.
         let text_entity = commands
             .spawn((
                 SplashScreenText,
-                Text2dBundle {
-                    text: Text {
-                        sections: vec![TextSection::new(
-                            "Reticulating splines...",
-                            TextStyle {
-                                font_size: 24.0,
-                                color: Color::WHITE,
-                                ..default()
-                            },
-                        )],
-                        justify: JustifyText::Left,
-                        linebreak_behavior: BreakLineOn::WordBoundary,
-                    },
-                    text_2d_bounds: Text2dBounds {
-                        // Wrap text in the rectangle
-                        size: text_box_size,
-                    },
-                    // ensure the text is drawn on top of the box
-                    // transform: Transform::from_xyz(-150.0, -200.0, 1.0),
-                    global_transform: GlobalTransform::from_xyz(-240.0, -200.0, 1.0),
-                    text_anchor: bevy::sprite::Anchor::BottomLeft,
+                Text2d::new("Reticulating splines..."),
+                TextFont {
+                    font_size: 16.0,
                     ..default()
                 },
+                TextColor::WHITE,
+                TextLayout::new_with_justify(JustifyText::Left),
+                GlobalTransform::from_xyz(-240.0, -200.0, 1.0),
+                Anchor::BottomLeft,
             ))
             .id();
         commands.entity(window_entity).add_child(text_entity);
@@ -159,15 +143,15 @@ impl SettleTownLoadingSplashScreenPlugin {
 
     fn check_texture_loaded(
         mut texture_events: EventReader<AssetEvent<Image>>,
-        texture_handles: Query<&Handle<Image>, With<SplashScreenSprite>>,
+        mut sprite_query: Query<&mut Sprite, With<SplashScreenSprite>>,
     ) {
         for event in texture_events.read() {
-            for handle in texture_handles.iter() {
+            for sprite in sprite_query.iter_mut() {
                 match event {
-                    AssetEvent::LoadedWithDependencies { id } if id == &handle.id() => {
+                    AssetEvent::LoadedWithDependencies { id } if id == &sprite.image.id() => {
                         info!("Splash screen texture loaded successfully");
                     }
-                    AssetEvent::Unused { id } if id == &handle.id() => {
+                    AssetEvent::Unused { id } if id == &sprite.image.id() => {
                         error!("Splash screen texture failed to load");
                     }
                     _ => {}
@@ -182,14 +166,14 @@ impl Plugin for SettleTownLoadingSplashScreenPlugin {
         app.init_state::<GameState>()
             .insert_resource(ClearColor(Color::NONE))
             .add_event::<SplashScreenTextUpdateEvent>()
-            .add_systems(Startup, SettleTownLoadingSplashScreenPlugin::setup)
-            .add_systems(
-                Update,
-                (
-                    SettleTownLoadingSplashScreenPlugin::check_texture_loaded,
-                    update_splash_screen_text,
-                ),
-            );
+            .add_systems(Startup, SettleTownLoadingSplashScreenPlugin::setup);
+        app.add_systems(
+            Update,
+            (
+                SettleTownLoadingSplashScreenPlugin::check_texture_loaded,
+                update_splash_screen_text,
+            ),
+        );
         app.add_systems(
             OnExit(GameState::LoadingSplashScreen),
             despawn_splash_screen,
@@ -199,11 +183,11 @@ impl Plugin for SettleTownLoadingSplashScreenPlugin {
 
 fn update_splash_screen_text(
     mut text_events: EventReader<SplashScreenTextUpdateEvent>,
-    mut text_query: Query<&mut Text, With<SplashScreenText>>,
+    mut text_query: Query<&mut Text2d, With<SplashScreenText>>,
 ) {
     for event in text_events.read() {
         if let Ok(mut text) = text_query.get_single_mut() {
-            text.sections[0].value = event.0.clone();
+            text.0 = event.0.clone();
         }
     }
 }
@@ -212,15 +196,6 @@ fn despawn_splash_screen(
     mut commands: Commands,
     splash_screen_window: Query<Entity, With<SplashScreenWindow>>,
 ) {
-    // Despawn the splash screen text
-    // XXX_jwir3: This code can be used to despawn and replace the splash screen text.
-    // if let Ok(text_entity) = text_entity.get_single() {
-    //     info!("Despawning splash screen text (Entity: {:?})", text_entity);
-    //     commands.entity(text_entity).despawn();
-    // } else {
-    //     error!("Splash screen text was not found");
-    // }
-
     // Despawn the splash screen window
     if let Ok(window_entity) = splash_screen_window.get_single() {
         info!(

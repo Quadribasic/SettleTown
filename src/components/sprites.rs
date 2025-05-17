@@ -1,9 +1,7 @@
 use bevy::{
-    asset::Handle,
     ecs::{bundle::Bundle, component::Component},
     prelude::{InheritedVisibility, Transform, ViewVisibility, Visibility},
-    render::texture::Image,
-    sprite::{Sprite, TextureAtlas},
+    sprite::Sprite,
     transform::components::GlobalTransform,
 };
 
@@ -32,8 +30,6 @@ pub struct DirectionalSpriteBundle {
     pub transform: Transform,
     /// The absolute transform of the sprite. This should generally not be written to directly.
     pub global_transform: GlobalTransform,
-    /// A reference-counted handle to the image asset to be drawn.
-    pub texture: Handle<Image>,
     /// User indication of whether an entity is visible
     pub visibility: Visibility,
     /// Inherited visibility of an entity.
@@ -43,21 +39,13 @@ pub struct DirectionalSpriteBundle {
     pub view_visibility: ViewVisibility,
     /// The direction the sprite is facing
     pub facing: Direction,
-    /// A texture atlas for looking up the sprite's representative visual textures.
-    pub atlas: TextureAtlas,
 }
 
 impl DirectionalSpriteBundle {
-    pub fn new(
-        texture_atlas: TextureAtlas,
-        transform: Transform,
-        texture: Handle<Image>,
-        facing: Direction,
-    ) -> Self {
+    pub fn new(sprite: Sprite, transform: Transform, facing: Direction) -> Self {
         Self {
-            atlas: texture_atlas,
+            sprite,
             transform,
-            texture,
             facing,
             ..Default::default()
         }

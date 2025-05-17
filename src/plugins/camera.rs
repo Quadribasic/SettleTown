@@ -62,15 +62,14 @@ pub fn setup_camera(
 ) {
     for event in window_created_event.read() {
         info!("Setting up camera for game world");
-        let camera = Camera {
-            target: RenderTarget::Window(WindowRef::Entity(event.window_entity)),
-            ..default()
-        };
 
-        let camera_bundle = Camera2dBundle {
-            camera,
-            ..default()
-        };
+        let camera_bundle = (
+            Camera2d,
+            Camera {
+                target: RenderTarget::Window(WindowRef::Entity(event.window_entity)),
+                ..default()
+            },
+        );
 
         commands.spawn((camera_bundle, OverheadMapCamera));
 

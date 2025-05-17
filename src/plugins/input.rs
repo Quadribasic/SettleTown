@@ -20,7 +20,7 @@ type CameraQuery<'a> = (&'a mut Camera, &'a mut Transform, &'a GlobalTransform);
 type PlayerQuery<'a> = (
     &'a mut Direction,
     &'a mut Transform,
-    &'a mut TextureAtlas,
+    &'a mut Sprite,
     &'a mut AnimationConfig,
 );
 

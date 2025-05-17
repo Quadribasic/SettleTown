@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use bevy::{prelude::*, window::WindowPlugin};
-use clap::Parser;
+use clap::{command, Parser};
 use plugins::{
     game_world_window::{
         SettleTownGameWorldWindowPlugin, DEFAULT_WINDOW_HEIGHT, DEFAULT_WINDOW_WIDTH,
@@ -42,7 +42,6 @@ mod systems;
 
 #[derive(Component)]
 pub struct DefaultWindow;
-
 struct DurationSplashScreenVisible(Duration);
 
 impl Default for DurationSplashScreenVisible {
@@ -89,21 +88,21 @@ fn main() {
         app.add_systems(Startup, label_default_window);
 
         if !args.disable_splash_screen {
-            app.add_plugins(SettleTownLoadingSplashScreenPlugin)
-                .add_systems(
-                    Update,
-                    transition_from_loading_splash_screen_once_time_has_elapsed
-                        .run_if(in_state(GameState::LoadingSplashScreen)),
-                )
-                .add_systems(
-                    Update,
-                    display_some_other_text_on_splash_screen
-                        .run_if(in_state(GameState::LoadingSplashScreen)),
-                )
-                .add_systems(
-                    OnExit(GameState::LoadingSplashScreen),
-                    make_default_window_invisible,
-                );
+            app.add_plugins(SettleTownLoadingSplashScreenPlugin);
+            app.add_systems(
+                Update,
+                transition_from_loading_splash_screen_once_time_has_elapsed
+                    .run_if(in_state(GameState::LoadingSplashScreen)),
+            );
+            app.add_systems(
+                Update,
+                display_some_other_text_on_splash_screen
+                    .run_if(in_state(GameState::LoadingSplashScreen)),
+            );
+            app.add_systems(
+                OnExit(GameState::LoadingSplashScreen),
+                make_default_window_invisible,
+            );
         } else {
             app.insert_state(GameState::InGameWorld);
             app.add_systems(
@@ -127,8 +126,8 @@ fn display_some_other_text_on_splash_screen(
     length: Local<DurationLoadingVisible>,
     time: Res<Time<Fixed>>,
 ) {
-    if time.elapsed_seconds() >= length.0.as_secs() as f32 {
-        commands.add(|world: &mut World| {
+    if time.elapsed_secs() >= length.0.as_secs() as f32 {
+        commands.queue(|world: &mut World| {
             world.send_event(SplashScreenTextUpdateEvent(
                 "Building the World...".to_string(),
             ));
@@ -142,7 +141,7 @@ fn transition_from_loading_splash_screen_once_time_has_elapsed(
     state: Res<State<GameState>>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
-    if time.elapsed_seconds() >= length.0.as_secs() as f32
+    if time.elapsed_secs() >= length.0.as_secs() as f32
         && *state.get() == GameState::LoadingSplashScreen
     {
         info!(

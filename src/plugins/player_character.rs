@@ -12,6 +12,7 @@ use crate::{
     components::sprites::{Direction, DirectionalSprite, DirectionalSpriteBundle},
     plugins::animation::AnimationConfig,
     resources::config::SettleTownConfig,
+    // resources::config::SettleTownConfig,
 };
 
 pub const PLAYER_CHARACTER_WALK_FPS: u8 = 10;
@@ -61,19 +62,25 @@ fn spawn_player_character_entity(
         ((player_char_facing.clone() as usize) * 9) + 8,
         PLAYER_CHARACTER_WALK_FPS,
     );
-    let player_character_sprite = DirectionalSpriteBundle::new(
+    let player_character_sprite = Sprite::from_atlas_image(
+        walkcycle_image,
         TextureAtlas {
             layout: texture_atlas_layout.clone(),
             index: pc_animation.first_sprite_index,
         },
-        Transform::from_scale(Vec3::splat(1.0)).with_translation(Vec3::new(0.0, 0.0, 1.0)),
-        walkcycle_image,
+    );
+    let player_character_transform =
+        Transform::from_scale(Vec3::splat(1.0)).with_translation(Vec3::new(0.0, 0.0, 1.0));
+
+    let pc_character_directional_bundle = DirectionalSpriteBundle::new(
+        player_character_sprite,
+        player_character_transform,
         player_char_facing,
     );
 
     let bundle = (
         PlayerCharacter,
-        player_character_sprite.clone(),
+        pc_character_directional_bundle.clone(),
         pc_animation,
         DirectionalSprite,
     );
@@ -113,6 +120,6 @@ fn draw_player_character_aabb(
         let size = Vec2::new(64.0, 64.0);
         let min = transform.translation.truncate() - size / 2.0;
         // let max = transform.translation.truncate() + size / 2.0;
-        gizmos.rect_2d(min + size / 2.0, 0.0, size, Color::srgb(0.0, 1.0, 0.0));
+        gizmos.rect_2d(min + size / 2.0, size, Color::srgb(0.0, 1.0, 0.0));
     }
 }
