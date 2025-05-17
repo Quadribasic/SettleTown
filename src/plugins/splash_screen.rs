@@ -21,6 +21,10 @@ pub struct SplashScreenSprite;
 #[derive(Component)]
 pub struct SplashScreenText;
 
+/// A marker component for the splash screen textmark.
+#[derive(Component)]
+pub struct SplashScreenTextmark;
+
 /// A marker component for the splash screen window.
 #[derive(Component)]
 pub struct SplashScreenWindow;
@@ -122,6 +126,22 @@ impl SettleTownLoadingSplashScreenPlugin {
             ))
             .id();
         commands.entity(window_entity).add_child(sprite_entity);
+
+        // Add a textmark at the center top of the splash screen
+        let textmark_handle: Handle<Image> = asset_server.load("custom/screens/Textmark.png");
+
+        let textmark_entity = commands
+            .spawn((
+                Sprite {
+                    image: textmark_handle.clone(),
+                    ..default()
+                },
+                GlobalTransform::from_xyz(0.0, 125.0, 1.0),
+                SplashScreenTextmark,
+            ))
+            .id();
+
+        commands.entity(window_entity).add_child(textmark_entity);
 
         // Add loading text at the bottom of the splash screen
         let text_entity = commands
