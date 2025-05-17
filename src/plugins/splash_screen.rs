@@ -186,7 +186,7 @@ fn update_splash_screen_text(
     mut text_query: Query<&mut Text2d, With<SplashScreenText>>,
 ) {
     for event in text_events.read() {
-        if let Ok(mut text) = text_query.get_single_mut() {
+        if let Ok(mut text) = text_query.single_mut() {
             text.0 = event.0.clone();
         }
     }
@@ -197,14 +197,14 @@ fn despawn_splash_screen(
     splash_screen_window: Query<Entity, With<SplashScreenWindow>>,
 ) {
     // Despawn the splash screen window
-    if let Ok(window_entity) = splash_screen_window.get_single() {
+    if let Ok(window_entity) = splash_screen_window.single() {
         info!(
             "Despawning splash screen window (Entity: {:?})",
             window_entity
         );
 
         // Despawn all children of this entity
-        commands.entity(window_entity).clear_children();
+        commands.entity(window_entity).remove::<Children>();
 
         // Despawn the window entity
         commands.entity(window_entity).despawn();

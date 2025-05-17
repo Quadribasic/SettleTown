@@ -11,9 +11,9 @@ organization = "quadribasic"
 resolver = "2"
 
 [dependencies]
-bevy = "0.15.3"
-bevy_state = "0.15.3"
-bevy_ecs_tilemap = "0.15.0"
+bevy = "0.16.0"
+bevy_state = "0.16.0"
+bevy_ecs_tilemap = "0.16.0"
 cargo_metadata = "0.18"
 clap = { version = "4.5.1", features = ["derive"] }
 directories = "5.0"

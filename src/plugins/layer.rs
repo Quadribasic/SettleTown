@@ -187,7 +187,9 @@ fn setup_rendering_of_layers(
             storage: tile_storage,
             texture: TilemapTexture::Single(grass_texture),
             tile_size,
-            transform: get_tilemap_center_transform(&tilemap_size, &grid_size, &map_type, 0.0),
+            anchor: TilemapAnchor::Center,
+            // transform: get_tilemap_center_transform(&tilemap_size, &grid_size, &map_type, 0.0),
+            // transform: Transform::from_xyz()
             ..Default::default()
         });
     }

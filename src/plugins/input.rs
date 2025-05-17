@@ -36,8 +36,8 @@ pub struct InputSystemState {
 // complex.
 fn keyboard_input_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut query_camera: Query<CameraQuery, (With<OverheadMapCamera>, Without<PlayerCharacter>)>,
-    mut query_player_character: Query<PlayerQuery, With<PlayerCharacter>>,
+    mut camera: Single<CameraQuery, (With<OverheadMapCamera>, Without<PlayerCharacter>)>,
+    mut player_char: Single<PlayerQuery, With<PlayerCharacter>>,
     world_coords: Res<WorldCoordinates>,
     viewport_size: Res<ViewportWorldSize>,
 ) {
@@ -49,8 +49,6 @@ fn keyboard_input_system(
     let mut vertical_camera_movement = 0.0;
 
     let mut shift_multiplier = 1.0;
-
-    let mut player_char = query_player_character.single_mut();
 
     // If we have the SHIFT key pressed, then we'll increase the rate of transition rate.
     if keyboard_input.pressed(KeyCode::ShiftLeft) || keyboard_input.pressed(KeyCode::ShiftRight) {
@@ -164,8 +162,6 @@ fn keyboard_input_system(
     // right edge aligns with the right edge of the world, the top edge aligns with the
     // top edge of the world, or the bottom edge aligns with the bottom edge of the
     // world.
-    let mut camera = query_camera.single_mut();
-
     let viewport_half_width = viewport_size.width / 2.0;
     let viewport_half_height = viewport_size.height / 2.0;
 

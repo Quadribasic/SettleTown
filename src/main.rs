@@ -153,7 +153,7 @@ fn transition_from_loading_splash_screen_once_time_has_elapsed(
 }
 
 fn label_default_window(mut commands: Commands, window: Query<Entity, Added<Window>>) {
-    if let Ok(window_entity) = window.get_single() {
+    if let Ok(window_entity) = window.single() {
         commands.entity(window_entity).insert(DefaultWindow);
     }
 }
@@ -164,7 +164,7 @@ fn make_default_window_invisible(
 ) {
     // Then despawn the default window
     info!("Despawning default window");
-    if let Ok(default_window_entity) = default_window.get_single() {
+    if let Ok(default_window_entity) = default_window.single() {
         commands.entity(default_window_entity).despawn();
     } else {
         info!("No default window was detected, skipping despawn")

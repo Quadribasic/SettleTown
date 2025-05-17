@@ -73,6 +73,6 @@ pub fn setup_camera(
 
         commands.spawn((camera_bundle, OverheadMapCamera));
 
-        camera_setup_event.send(CameraSetupEvent);
+        camera_setup_event.write(CameraSetupEvent);
     }
 }

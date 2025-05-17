@@ -2,11 +2,13 @@ use std::time::Duration;
 
 use bevy::{
     app::{Plugin, Update},
-    ecs::schedule::Condition,
+    ecs::{
+        schedule::{Condition, IntoScheduleConfigs},
+        system::Single,
+    },
     input::common_conditions::input_just_pressed,
     log::info,
-    prelude::*,
-    sprite::TextureAtlas,
+    prelude::{Component, KeyCode, Query, Res, Sprite, State, TextureAtlas, With},
     time::{Time, Timer, TimerMode},
 };
 use bevy_state::state::States;
@@ -138,16 +140,14 @@ pub fn execute_animations_indefinite(
     }
 }
 
-// fn trigger_animation<S: Component>(mut animation: Single<&mut AnimationConfig, With<S>>) {
 fn trigger_animation<S: Component>(
-    mut query: Query<(&mut AnimationConfig, &mut Direction, &mut Sprite), With<S>>,
+    mut animation: Single<(&mut AnimationConfig, &mut Direction, &mut Sprite), With<S>>,
     current_state: Res<State<GameState>>,
 ) {
     if *current_state.get() != GameState::InGameWorld {
         return;
     }
 
-    let mut animation = query.single_mut();
     info!("Triggering animation with direction: {:?}", animation.1);
 
     // Calculate the base index for the current direction's animation frames

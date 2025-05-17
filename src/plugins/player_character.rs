@@ -1,18 +1,22 @@
 use bevy::{
     app::Plugin,
     asset::{AssetServer, Assets, Handle},
+    gizmos::gizmos::Gizmos,
+    image::Image,
     log::info,
     math::{UVec2, Vec3},
-    prelude::*,
-    sprite::{TextureAtlas, TextureAtlasLayout},
+    prelude::{
+        Color, Commands, Component, OnEnter, Query, Res, ResMut, Sprite, TextureAtlas,
+        TextureAtlasLayout, Transform, Update, Vec2, With,
+    },
 };
+
 use bevy_state::state::States;
 
 use crate::{
     components::sprites::{Direction, DirectionalSprite, DirectionalSpriteBundle},
     plugins::animation::AnimationConfig,
-    resources::config::SettleTownConfig,
-    // resources::config::SettleTownConfig,
+    resources::config::SettleTownConfig, // resources::config::SettleTownConfig,
 };
 
 pub const PLAYER_CHARACTER_WALK_FPS: u8 = 10;

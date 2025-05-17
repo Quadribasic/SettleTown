@@ -1,12 +1,13 @@
 use bevy::{app::Plugin, prelude::*};
 use bevy_state::state::States;
 
+use crate::states::game_states::GameState;
+
 use super::{
     animation::SettleTownSpriteAnimatorPlugin, camera::SettleTownCameraPlugin,
     input::SettleTownInputPlugin, layer::SettleTownLayerPlugin,
     player_character::SettleTownPlayerCharacterPlugin,
 };
-use crate::states::game_states::GameState;
 
 /// The default width of the game world window, in device pixels.
 pub const DEFAULT_WINDOW_WIDTH: f32 = 1408.0;
@@ -106,5 +107,5 @@ fn create_game_world_window(
         ))
         .id();
 
-    message_bus.send(GameWorldWindowCreated { window_entity });
+    message_bus.write(GameWorldWindowCreated { window_entity });
 }
