@@ -62,6 +62,9 @@ fn keyboard_input_system(
 
     // Update the player character's facing direction and the position of the
     // player character.
+    // XXX_jwir3: The side position of the player character sprite should
+    // override the north/south position when two directional keys are
+    // pressed, moving the character diagonally.
     let mut pc_movement: Vec3 = player_char.1.translation;
     if [KeyCode::ArrowRight, KeyCode::KeyD]
         .iter()

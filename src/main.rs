@@ -6,6 +6,7 @@ use plugins::{
     game_world_window::{
         SettleTownGameWorldWindowPlugin, DEFAULT_WINDOW_HEIGHT, DEFAULT_WINDOW_WIDTH,
     },
+    layer::{EdgeDirection, GroundLayerBuilder, GroundTileType, LayerStack},
     splash_screen::{SettleTownLoadingSplashScreenPlugin, SplashScreenTextUpdateEvent},
 };
 use resources::config::SettleTownConfig;
@@ -50,13 +51,8 @@ impl Default for DurationSplashScreenVisible {
     }
 }
 
-struct DurationLoadingVisible(Duration);
-
-impl Default for DurationLoadingVisible {
-    fn default() -> Self {
-        DurationLoadingVisible(Duration::from_secs(2))
-    }
-}
+#[derive(Debug, Event)]
+pub struct GameWorldCreatedEvent;
 
 fn main() {
     let args = Args::parse();
@@ -64,6 +60,7 @@ fn main() {
     // Create the app and and default plugins before all else because this sets
     // up logging and other things that are necessary for the rest of the application.
     let mut app = App::new();
+    app.add_event::<GameWorldCreatedEvent>();
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
             visible: false,
@@ -94,11 +91,7 @@ fn main() {
                 transition_from_loading_splash_screen_once_time_has_elapsed
                     .run_if(in_state(GameState::LoadingSplashScreen)),
             );
-            app.add_systems(
-                Update,
-                display_some_other_text_on_splash_screen
-                    .run_if(in_state(GameState::LoadingSplashScreen)),
-            );
+            app.add_systems(Update, display_some_other_text_on_splash_screen);
             app.add_systems(
                 OnExit(GameState::LoadingSplashScreen),
                 make_default_window_invisible,
@@ -110,6 +103,8 @@ fn main() {
                 make_default_window_invisible.after(label_default_window),
             );
         }
+
+        app.add_systems(Startup, create_game_world);
 
         app.add_plugins(SettleTownGameWorldWindowPlugin {
             enabled_state: GameState::InGameWorld,
@@ -123,13 +118,13 @@ fn main() {
 
 fn display_some_other_text_on_splash_screen(
     mut commands: Commands,
-    length: Local<DurationLoadingVisible>,
-    time: Res<Time<Fixed>>,
+    mut event_reader: EventReader<GameWorldCreatedEvent>,
 ) {
-    if time.elapsed_secs() >= length.0.as_secs() as f32 {
+    for event in event_reader.read() {
+        info!("Event received: {:?}", event);
         commands.queue(|world: &mut World| {
             world.send_event(SplashScreenTextUpdateEvent(
-                "Building the World...".to_string(),
+                "Reticulating splines...".to_string(),
             ));
         });
     }
@@ -169,4 +164,90 @@ fn make_default_window_invisible(
     } else {
         info!("No default window was detected, skipping despawn")
     }
+}
+
+fn create_game_world(mut commands: Commands, mut event_writer: EventWriter<GameWorldCreatedEvent>) {
+    let layer_width: usize = 320;
+    let layer_height: usize = 320;
+
+    let mut layer_stack = LayerStack::new();
+    layer_stack.add_layers(
+        // XXX_jwir3: We should be creating the layer during the initial load phase of the
+        //            game, not here.
+        GroundLayerBuilder::new(layer_width, layer_height, GroundTileType::Grass)
+            .add_edges_and_corner_tiles_for_base_tile(
+                GroundTileType::Grass,
+                vec![
+                    (
+                        EdgeDirection::OutsideTopLeft,
+                        GroundTileType::GrassEdgeOutsideTopLeft,
+                    ),
+                    (EdgeDirection::Top, GroundTileType::GrassEdgeTop),
+                    (
+                        EdgeDirection::OutsideTopRight,
+                        GroundTileType::GrassEdgeOutsideTopRight,
+                    ),
+                    (EdgeDirection::Right, GroundTileType::GrassEdgeRight),
+                    (
+                        EdgeDirection::OutsideBottomRight,
+                        GroundTileType::GrassEdgeOutsideBottomRight,
+                    ),
+                    (EdgeDirection::Bottom, GroundTileType::GrassEdgeBottom),
+                    (
+                        EdgeDirection::OutsideBottomLeft,
+                        GroundTileType::GrassEdgeOutsideBottomLeft,
+                    ),
+                    (EdgeDirection::Left, GroundTileType::GrassEdgeLeft),
+                ],
+            )
+            .generate_variegated_base(GroundTileType::RockyDirt)
+            // .decorate_edge_tiles_differing_from_base(
+            //     GroundTileType::Grass,
+            //     (
+            //         GroundTileType::GrassEdgeTop,
+            //         GroundTileType::GrassEdgeRight,
+            //         GroundTileType::GrassEdgeBottom,
+            //         GroundTileType::GrassEdgeLeft,
+            //     ),
+            // )
+            // .replace_inside_top_left_corners(
+            //     GroundTileType::Grass,
+            //     GroundTileType::GrassEdgeInsideCornerTopLeft,
+            // )
+            // Add alternatives last to simplify processing of tiles.
+            .add_alternative_for(
+                GroundTileType::Grass,
+                GroundTileType::GrassAlternate1,
+                0.033,
+            )
+            .add_alternative_for(
+                GroundTileType::Grass,
+                GroundTileType::GrassAlternate2,
+                0.033,
+            )
+            .add_alternative_for(
+                GroundTileType::Grass,
+                GroundTileType::GrassAlternate3,
+                0.033,
+            )
+            .add_alternative_for(
+                GroundTileType::RockyDirt,
+                GroundTileType::RockyDirtAlternate1,
+                0.033,
+            )
+            .add_alternative_for(
+                GroundTileType::RockyDirt,
+                GroundTileType::RockyDirtAlternate2,
+                0.033,
+            )
+            .add_alternative_for(
+                GroundTileType::RockyDirt,
+                GroundTileType::RockyDirtAlternate3,
+                0.033,
+            )
+            .build(),
+    );
+    commands.insert_resource(layer_stack);
+
+    event_writer.write(GameWorldCreatedEvent);
 }

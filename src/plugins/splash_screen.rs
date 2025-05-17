@@ -147,7 +147,7 @@ impl SettleTownLoadingSplashScreenPlugin {
         let text_entity = commands
             .spawn((
                 SplashScreenText,
-                Text2d::new("Reticulating splines..."),
+                Text2d::new("Creating game world..."),
                 TextFont {
                     font_size: 16.0,
                     ..default()
