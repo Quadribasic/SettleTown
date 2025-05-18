@@ -11,8 +11,25 @@ pub enum GameState {
     InGameWorld,
 }
 
+/// The loading states for SettleTown. All of these should be completed before
+/// the `GameState::InGameWorld` state is entered.
 #[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum LoadingState {
+    /// The loading splash screen is being initialized and shown.
     #[default]
+    IntializingLoadingSplashScreen,
+    /// The game world is being created.
     CreatingGameWorld,
+    /// An idle state that gives homage back to Sim City.
+    ReticulatingSplines,
+}
+
+impl LoadingState {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            LoadingState::IntializingLoadingSplashScreen => "Initializing loading splash screen...",
+            LoadingState::CreatingGameWorld => "Creating game world...",
+            LoadingState::ReticulatingSplines => "Reticulating splines...",
+        }
+    }
 }

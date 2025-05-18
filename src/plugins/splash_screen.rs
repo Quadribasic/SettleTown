@@ -11,7 +11,7 @@ use bevy::{
     },
 };
 
-use crate::states::game_states::GameState;
+use crate::states::game_states::{GameState, LoadingState};
 
 /// A marker component for the splash screen sprite.
 #[derive(Component)]
@@ -36,7 +36,11 @@ pub struct SplashScreenTextUpdateEvent(pub String);
 pub struct SettleTownLoadingSplashScreenPlugin;
 
 impl SettleTownLoadingSplashScreenPlugin {
-    fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    fn setup(
+        mut commands: Commands,
+        asset_server: Res<AssetServer>,
+        current_state: Res<State<LoadingState>>,
+    ) {
         info!("Setting up the splash screen");
         // Create the splash screen window
         let window = Window {
@@ -143,11 +147,14 @@ impl SettleTownLoadingSplashScreenPlugin {
 
         commands.entity(window_entity).add_child(textmark_entity);
 
+        // The inital state for loading.
+        let loading_state = current_state.get();
+
         // Add loading text at the bottom of the splash screen
         let text_entity = commands
             .spawn((
                 SplashScreenText,
-                Text2d::new("Creating game world..."),
+                Text2d::new(loading_state.as_str().to_string()),
                 TextFont {
                     font_size: 16.0,
                     ..default()
@@ -184,9 +191,18 @@ impl SettleTownLoadingSplashScreenPlugin {
 impl Plugin for SettleTownLoadingSplashScreenPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.init_state::<GameState>()
+            .init_state::<LoadingState>()
             .insert_resource(ClearColor(Color::NONE))
             .add_event::<SplashScreenTextUpdateEvent>()
             .add_systems(Startup, SettleTownLoadingSplashScreenPlugin::setup);
+        app.add_systems(
+            OnEnter(LoadingState::CreatingGameWorld),
+            update_splash_screen_text_based_on_loading_state,
+        );
+        app.add_systems(
+            OnEnter(LoadingState::ReticulatingSplines),
+            update_splash_screen_text_based_on_loading_state,
+        );
         app.add_systems(
             Update,
             (
@@ -198,6 +214,15 @@ impl Plugin for SettleTownLoadingSplashScreenPlugin {
             OnExit(GameState::LoadingSplashScreen),
             despawn_splash_screen,
         );
+    }
+}
+
+fn update_splash_screen_text_based_on_loading_state(
+    state: Res<State<LoadingState>>,
+    mut text_query: Query<&mut Text2d, With<SplashScreenText>>,
+) {
+    if let Ok(mut text) = text_query.single_mut() {
+        text.0 = state.get().as_str().to_string();
     }
 }
 

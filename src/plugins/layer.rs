@@ -4,6 +4,7 @@ use bevy::{
     app::Plugin,
     asset::AssetServer,
     prelude::{Commands, Res, Resource},
+    tasks::Task,
 };
 use bevy_ecs_tilemap::{
     map::{TilemapId, TilemapSize, TilemapTexture, TilemapTileSize, TilemapType},
@@ -113,6 +114,13 @@ fn setup_rendering_of_layers(
     }
 }
 
+/// A resource that contains a task that will compute the necessary tiles for a layer
+/// within the world.
+#[derive(Resource)]
+pub struct ComputeLayerTask {
+    pub task: Task<LayerStack>,
+}
+
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum EdgeDirection {
     Top,
@@ -159,16 +167,6 @@ impl From<GroundTileType> for u32 {
         val as u32
     }
 }
-
-// impl RenderableTileType for GroundTileType {
-//     fn as_u32(self) -> u32 {
-//         self as u32
-//     }
-// }
-
-// pub trait RenderableTileType: DynClone + Sync + Send {
-//     fn as_u32(self) -> u32;
-// }
 
 /// A layer that can be rendered to the screen.
 #[derive(Clone)]
