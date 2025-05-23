@@ -55,7 +55,7 @@ fn spawn_player_character_entity(
     info!("Spawning player character entity");
     // Load the necessary texture from a file for the player character
     let walkcycle_image: Handle<Image> =
-        asset_server.load("custom/sprites/people/male_walkcycle.png");
+        asset_server.load("custom/sprites/people/BadlandsBartWalkcycle.png");
     // the sprite sheet has 9 sprites arranged in four rows, and they are all 64x64 pixels
     let layout = TextureAtlasLayout::from_grid(UVec2::splat(64), 9, 4, None, None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
