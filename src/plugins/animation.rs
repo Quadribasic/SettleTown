@@ -176,12 +176,12 @@ impl AnimationUtils {
         sprite_height: u32
     ) -> (u32, u32) {
         // TODO_jwir3: We need to get metadata for this after the asset is loaded.
-        // let image = assets.get(image_handle).expect("Image not found in assets");
-        // let image_size = image.size();
-        // let num_columns = ((image_size.x / sprite_width) as f32).ceil() as u32;
-        // let num_rows = ((image_size.y / sprite_height) as f32).ceil() as u32;
+        let image = assets.get(image_handle.id()).expect("Image not found in assets");
+        let image_size = image.size();
+        let num_columns = ((image_size.x / sprite_width) as f32).ceil() as u32;
+        let num_rows = ((image_size.y / sprite_height) as f32).ceil() as u32;
 
-        // (num_columns, num_rows)
-        (8, 4)
+        (num_columns, num_rows)
+        // (8, 4)
     }
 }

@@ -20,6 +20,8 @@ pub enum LoadingState {
     IntializingLoadingSplashScreen,
     /// The game world is being created.
     CreatingGameWorld,
+    /// The sprites are being loaded.
+    LoadingSprites,
     /// An idle state that gives homage back to Sim City.
     ReticulatingSplines,
 }
@@ -29,6 +31,7 @@ impl LoadingState {
         match self {
             LoadingState::IntializingLoadingSplashScreen => "Initializing loading splash screen...",
             LoadingState::CreatingGameWorld => "Creating game world...",
+            LoadingState::LoadingSprites => "Loading sprites...",
             LoadingState::ReticulatingSplines => "Reticulating splines...",
         }
     }

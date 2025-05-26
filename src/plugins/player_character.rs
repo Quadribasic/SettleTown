@@ -16,7 +16,7 @@ use bevy_state::state::States;
 use crate::{
     components::sprites::{Direction, DirectionalSprite, DirectionalSpriteBundle},
     plugins::animation::{AnimationConfig, AnimationUtils},
-    resources::config::SettleTownConfig, // resources::config::SettleTownConfig,
+    resources::config::SettleTownConfig, AssetQueue, // resources::config::SettleTownConfig,
 };
 
 pub const PLAYER_CHARACTER_WALK_FPS: u8 = 10;
@@ -52,12 +52,22 @@ fn spawn_player_character_entity(
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     images: Res<Assets<Image>>,
+    asset_queue: Res<AssetQueue>,
 ) {
     info!("Spawning player character entity");
-    // Load the necessary texture from a file for the player character
-    let walkcycle_image: Handle<Image> =
-        asset_server.load("custom/sprites/people/BadlandsBartWalkcycle.png");
-    // let actual_image = images.get(&walkcycle_image).unwrap();
+    // Load the necessary texture from a file for the player character. Because we loaded this
+    // asset during the splash screen loading phase, it should be available in the asset server
+    // at this point.
+    // let walkcycle_image: Handle<Image> =
+    //     asset_server.load("custom/sprites/people/BadlandsBartWalkcycle.png");
+
+    // XXX_jwir3: The asset server should be handling this and loading the image, but it seems
+    //            the asset path is somehow different when we perform the above load _again_.
+    let walkcycle_image = asset_queue.paths_to_ids.get(
+        "custom/sprites/people/BadlandsBartWalkcycle.png",
+    ).cloned().expect("BadlandsBartWalkcycle.png should have been loaded during the splash screen phase");
+    info!("Player character walkcycle image handle: {:?}", walkcycle_image);
+    info!("Player character walkcycle image load state: {:?}", asset_server.get_load_state(&walkcycle_image));
     let num_frames = AnimationUtils::get_num_frames_for_animation(images, walkcycle_image.clone(), 64, 64);
 
     // the sprite sheet has 8 sprites arranged in four rows, and they are all 64x64 pixels

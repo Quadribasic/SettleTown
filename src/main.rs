@@ -1,9 +1,7 @@
-use std::time::Duration;
+use std::{collections::HashMap, time::Duration};
 
 use bevy::{
-    prelude::*,
-    tasks::{block_on, futures_lite::future, AsyncComputeTaskPool, Task},
-    window::WindowPlugin,
+    asset::{LoadState, UntypedAssetId}, prelude::*, tasks::{block_on, futures_lite::future, AsyncComputeTaskPool, Task}, window::WindowPlugin
 };
 use clap::{command, Parser};
 use plugins::{
@@ -59,6 +57,12 @@ impl Default for DurationSplashScreenVisible {
 #[derive(Debug, Event)]
 pub struct GameWorldCreatedEvent;
 
+#[derive(Resource)]
+pub struct AssetQueue {
+    pub assets_to_load: Vec<UntypedHandle>,
+    pub paths_to_ids: HashMap<String, Handle<Image>>,
+}
+
 fn main() {
     let args = Args::parse();
 
@@ -82,6 +86,13 @@ fn main() {
     // Insert the configuration resource into the app
     app.insert_resource(configuration);
 
+    // This is a list of assets that need to be loaded before the game can start.
+    let asset_queue: Vec<UntypedHandle> = Vec::new();
+    app.insert_resource(AssetQueue {
+        assets_to_load: asset_queue,
+        paths_to_ids: HashMap::new(),
+    });
+
     // This just controls whether we want to exit after clobbering or initializing the configuration
     // file.
     if !args.create_config_file && !args.overwrite_config_file_with_default {
@@ -104,6 +115,14 @@ fn main() {
         app.add_systems(
             OnEnter(LoadingState::IntializingLoadingSplashScreen),
             create_game_world,
+        );
+        app.add_systems(
+            OnEnter(LoadingState::LoadingSprites),
+            load_sprites,
+        );
+        app.add_systems(
+            Update,
+            check_assets_ready.run_if(in_state(LoadingState::LoadingSprites)),
         );
         app.add_systems(
             Update,
@@ -262,6 +281,84 @@ fn poll_layer_stack_task(
 ) {
     if let Some(layer_stack) = block_on(future::poll_once(&mut compute_layer_task.task)) {
         commands.insert_resource(layer_stack);
-        next_state.set(LoadingState::ReticulatingSplines);
+        next_state.set(LoadingState::LoadingSprites);
     }
+}
+
+fn load_sprites(
+    mut asset_queue: ResMut<AssetQueue>,
+    asset_server: Res<AssetServer>,
+    // mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+) {
+    info!("Loading sprites...");
+
+    // Load the necessary texture from a file for the player character
+    let walkcycle_image: Handle<Image> =
+        asset_server.load("custom/sprites/people/BadlandsBartWalkcycle.png");
+    asset_queue.paths_to_ids.insert(
+        "custom/sprites/people/BadlandsBartWalkcycle.png".to_string(),
+        walkcycle_image.clone(),
+    );
+    asset_queue.assets_to_load.push(walkcycle_image.untyped());
+}
+
+fn check_assets_ready(
+    mut commands: Commands,
+    server: Res<AssetServer>,
+    loading: ResMut<AssetQueue>,
+    mut next_state: ResMut<NextState<LoadingState>>,
+) {
+    match get_group_load_state(&server, loading.assets_to_load.iter().map(|h| h.id())) {
+        LoadState::Loaded => {
+            info!("All assets loaded successfully. Proceeding to next state.");
+            next_state.set(LoadingState::ReticulatingSplines);
+        },
+        LoadState::Failed(asset_load_error) => {
+            error!("Failed to load assets: {:?}", asset_load_error);
+        },
+        _ => {
+            // Assets aren't fully loaded yet, so we can't proceed.
+            info!("Assets are not fully loaded yet, waiting...");
+        }
+    }
+}
+
+        // LoadState::Failed => {
+        //     // one of our assets had an error
+        // }
+        // LoadState::Loaded => {
+        //     // all assets are now ready
+
+        //     // this might be a good place to transition into your in-game state
+
+        //     // remove the resource to drop the tracking handles
+        //     commands.remove_resource::<AssetsLoading>();
+        //     // (note: if you don't have any other handles to the assets
+        //     // elsewhere, they will get unloaded after this)
+        // }
+        // _ => {
+        //     // NotLoaded/Loading: not fully ready yet
+        // }
+fn get_group_load_state(server: &AssetServer, handles: impl IntoIterator<Item = UntypedAssetId>) -> LoadState {
+    let mut load_state= LoadState::Loaded;
+    for handle_id in handles {
+        match server.get_load_state(handle_id) {
+            Some(LoadState::Loaded) => {
+                // If we find a single asset that is loaded, we can continue
+                // to the next one.
+                info!("Asset {:?} is loaded", handle_id);
+                info!("Asset path for entity: {:?}", server.get_path(handle_id));
+                continue;
+            },
+            Some(LoadState::Loading) => {
+                load_state = LoadState::Loading;
+            }
+            Some(LoadState::Failed(x)) => return LoadState::Failed(x),
+            Some(LoadState::NotLoaded) => return LoadState::NotLoaded,
+            None => return LoadState::NotLoaded,
+        }
+    }
+
+
+    load_state
 }
