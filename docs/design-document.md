@@ -112,11 +112,11 @@ The visual identity of SettleTown is built on a foundation of high-fidelity pixe
   - **Primary Reference & Quality Benchmark**: The core visual style is highly detailed 2D pixel art, similar in quality, richness, and tone to Graveyard Keeper. This means expressive character sprites, textured environments, and a focus on atmospheric details. While inspired by the community feel of Stardew Valley, our aesthetic leans towards a more textured and less "cutesy" representation, emphasizing the handcrafted and weathered nature of the world.
   - **Perspective**: The game will utilize a top-down or slightly isometric perspective. This viewpoint is ideal for managing the town layout, overseeing character activities, and maintaining the classic feel of the simulation and strategy genres that inspire the game. It allows players to feel both connected to their individual character and empowered as the guiding hand of the entire settlement.
   - **Color Palette**: The palette is rich and dynamic, shifting with the time of day, weather, and mood.
-        - **Daytime**: Dominated by warm, earthy tones. The sun-bleached browns of dust and lumber, the deep greens of forests, the vibrant gold of wheat fields, and the vast, clear blue of the prairie sky.
-        - **Dusk & Dawn**: Dusk & Dawn: "Magic hour" is a key aesthetic, representing a time of transition. These moments serve a dual purpose, creating both cozy comfort and a rising sense of mystery. The palette will shift to deep oranges, purples, and the warm, inviting yellow glow from lanterns and campfires, reinforcing the "cozy" pillar and making the settlement feel like a safe harbor.
-        However, as the light fades, the boundary between the mundane and the mythic blurs. This is the time when mystery and supernatural occurrences are highlighted. Long, stretching shadows play tricks on the eye, and the low light is perfect for glimpsing strange silhouettes at the edge of the woods or seeing the first flicker of eerie "ghost lights" on the distant hills. The lighting will be used to create a sense of comfort within the town's lantern-lit spaces while simultaneously instilling a feeling of apprehension about what lies in the growing darkness just beyond.
-        - **Night**: Deep indigos and blacks will be punctuated by pools of light. The moon will cast a cool, silvery glow. This contrast will be used to create both peaceful, quiet moments and a sense of isolation and vulnerability.
-        - **Supernatural**: When mysterious elements are at play, the palette will subtly shift. Colors may become slightly desaturated, or an unnatural, sickly green or pale blue light might emanate from a cursed mine or appear as "ghost lights" on the horizon, creating an eerie and unsettling atmosphere without resorting to overt horror.
+    - **Daytime**: Dominated by warm, earthy tones. The sun-bleached browns of dust and lumber, the deep greens of forests, the vibrant gold of wheat fields, and the vast, clear blue of the prairie sky.
+    - **Dusk & Dawn**: Dusk & Dawn: "Magic hour" is a key aesthetic, representing a time of transition. These moments serve a dual purpose, creating both cozy comfort and a rising sense of mystery. The palette will shift to deep oranges, purples, and the warm, inviting yellow glow from lanterns and campfires, reinforcing the "cozy" pillar and making the settlement feel like a safe harbor.
+    However, as the light fades, the boundary between the mundane and the mythic blurs. This is the time when mystery and supernatural occurrences are highlighted. Long, stretching shadows play tricks on the eye, and the low light is perfect for glimpsing strange silhouettes at the edge of the woods or seeing the first flicker of eerie "ghost lights" on the distant hills. The lighting will be used to create a sense of comfort within the town's lantern-lit spaces while simultaneously instilling a feeling of apprehension about what lies in the growing darkness just beyond.
+    - **Night**: Deep indigos and blacks will be punctuated by pools of light. The moon will cast a cool, silvery glow. This contrast will be used to create both peaceful, quiet moments and a sense of isolation and vulnerability.
+    - **Supernatural**: When mysterious elements are at play, the palette will subtly shift. Colors may become slightly desaturated, or an unnatural, sickly green or pale blue light might emanate from a cursed mine or appear as "ghost lights" on the horizon, creating an eerie and unsettling atmosphere without resorting to overt horror.
   - **Architecture & Environment**: The world should feel tangible and handcrafted.
     - **Structures**: Buildings are the primary indicator of progress. Initial shelters will be rough log cabins, sod houses, or simple lean-tos. As the town grows, structures will become more sophisticated: milled lumber, proper joinery, stone foundations, glass-pane windows, and painted signs. All structures will have a weathered, lived-in feel, reflecting the "resourcefulness and craftsmanship" of the settlers. Rust on a nail, a crack in a board, or a sagging porch roof tells a story.
     - **Nature**: The natural world is vast and untamed, a beautiful but imposing force. Landscapes will range from rolling plains and dense forests to arid, rocky deserts. The contrast between the small, organized, warm town and the sprawling, wild frontier is a central visual theme.
@@ -131,9 +131,9 @@ The visual identity of SettleTown is built on a foundation of high-fidelity pixe
 ### Audio Style
 The audio landscape of SettleTown will be crucial for balancing the cozy, community-focused gameplay with the underlying sense of frontier hardship and supernatural mystery.
 
-  - **Music**: The score will be primarily composed of acoustic, frontier-folk style music. The instrumentation will heavily feature weathered-sounding acoustic guitars, melancholic fiddle, gentle banjo, and harmonica. The music will be dynamic, shifting in tone to match the time of day, weather, and current gameplay situation. For example, daytime building and exploration will be accompanied by optimistic, melodic tunes, while dusk will bring slower, more reflective melodies. During moments of tension or supernatural events, the score will shift to sparse, atmospheric, and eerie arrangements, using dissonant strings or a lone, echoing instrument to create unease without resorting to full horror. Whispered folk songs could feature as rare, thematic elements.
-  - **Sound Effects (SFX)**: The sound design will focus on creating a rich, immersive soundscape grounded in the natural and man-made elements of the Old West. Environmental sounds will be key to establishing the atmosphere: the howl of coyotes at dusk, the chirp of cicadas on a hot day, the whistle of prairie winds, and the gentle patter of rain on a tin roof. Action-based sounds will be tactile and satisfying, such as the solid thump of an axe striking wood, the creak of a saloon sign, and the jingle of spurs on a wooden boardwalk. Subtle, mysterious sounds—like distant, unexplained whispers in a mine shaft or the spectral sound of a lone horse whinnying in the dead of night—will be used to build the supernatural element, hinting at the legends buried beneath the land.
+  - **Music**: The score will be primarily composed of acoustic, frontier-folk style music, original to this game and not reused elsewhere. The instrumentation will heavily feature weathered-sounding acoustic guitars, melancholic fiddle, gentle banjo, and harmonica. The music will be dynamic, shifting in tone to match the time of day, weather, and current gameplay situation. For example, daytime building and exploration will be accompanied by optimistic, melodic tunes, while dusk will bring slower, more reflective melodies. During moments of tension or supernatural events, the score will shift to sparse, atmospheric, and eerie arrangements, using dissonant strings or a lone, echoing instrument to create unease without resorting to full horror. Whispered folk songs could feature as rare, thematic elements.
 
+  - **Sound Effects (SFX)**: The sound design will focus on creating a rich, immersive soundscape grounded in the natural and man-made elements of the Old West. Environmental sounds will be key to establishing the atmosphere: the howl of coyotes at dusk, the chirp of cicadas on a hot day, the whistle of prairie winds, and the gentle patter of rain on a tin roof. Action-based sounds will be tactile and satisfying, such as the solid thump of an axe striking wood, the creak of a saloon sign, and the jingle of spurs on a wooden boardwalk. Subtle, mysterious sounds—like distant, unexplained whispers in a mine shaft or the spectral sound of a lone horse whinnying in the dead of night—will be used to build the supernatural element, hinting at the legends buried beneath the land.
   While the music will be original, we want to reuse as much foley art as possible for our sound effects. We will take from open, royalty-free sources such as the Library of Congress' sound library, as well as the [BBC's public sound effects](https://sound-effects.bbcrewind.co.uk/). As an absolute last-resort, we will create sound effects ourselves, but, for the most part to save costs and time, we want to reuse as much as possible.
 
 ### Character Archetypes
@@ -456,18 +456,143 @@ Narrative Hooks:
 - Players choose to rebuild, redeem, or abandon their legacy.
 
 ### Detailed Gameplay
+#### Starting Out
+- The game begins on a procedurally generated, random map, which is initially completely undiscovered and hidden by a black overlay.
+- As the player explores, the map is revealed. Any area not actively part of the town or within a settler's direct line of sight will be covered by a "fog of war."
+- The player starts with a Conestoga wagon containing all the initial supplies required for survival. This wagon is fully controllable by the player.
+- Before the town is founded, the player character can leave the wagon to explore the map on foot and get back inside to move the wagon to a new location.
+- Once the player officially establishes the town, the wagon becomes a fixed object and can no longer be moved.
+- Item/Inventory management are available here, and even after the town is founded, the player can use the wagon (now immovable) as a separate inventory.
+- Hunting and Fishing are available, provided the base skills are available to the player
+
+#### Resource Acquisition
+
+#### Founding the Town
+Founding the town is the player's first major objective, transitioning the game from the initial exploration of the `Starting Out` phase to the `Midgame Phase`. This process solidifies the town's location and is achieved by completing three key tasks, which expand upon the objectives listed in the **Core Gameplay: Start Phase**.
+
+* **1. Dig a Well:** The player must secure a permanent water source for their settlement.
+    * **Water Table Mechanic:** The difficulty of this task is determined by an invisible "water table" map layer that dictates how deep the player must dig to reach water. The player is not explicitly told the required depth. They must infer it based on the surrounding geography; being closer to a river, stream, or lake means the water table will be nearer to the surface, resulting in an easier dig.
+
+    ##### **Well-Digging Mechanics**
+    To make the process of digging a well interactive and visually clear, it will be a multi-stage task involving player action, resource management, and clear feedback.
+
+    * **Step 1: Initiation**
+        * The player equips a shovel and selects a 1x1 tile on the ground to begin digging. Each use of the shovel consumes stamina, tying into the **Survival Mechanics (Start Phase)**.
+
+    * **Step 2: Visual Progression of Depth**
+        * The process of digging is represented through a series of changing sprites for the targeted tile, providing a clear visual indicator of progress and depth. This leverages the "Highly detailed 2D pixel art" style.
+        * **Initial Dig:** The ground tile changes from its standard appearance to a patch of disturbed earth.
+        * **Shallow Hole:** After several digs, the tile changes to a shallow hole, with a darker interior and loose dirt piled around the edge.
+        * **Increasing Depth:** With continued digging, the hole's sprite changes through several stages, each appearing deeper and darker. This can create a "3D illusion in 2D," a technique mentioned in the **Visual Style** section.
+        * **"You're Close" Cue:** When the player gets very close to the water table, the bottom of the hole sprite will change to a damp, muddy texture. The audio cue will also change from a dry digging sound to a wet, squishing sound, reflecting the focus on a rich soundscape.
+
+    * **Step 3: Striking Water**
+        * Upon reaching the water table depth, the final dig action triggers a special event:
+            * **Visual Cue:** A small splash animation plays inside the hole, and the tile permanently changes to a water-filled hole.
+            * **Audio Cue:** A clear "splash" or "gurgle" sound effect plays.
+            * **UI Feedback:** A simple text box appears, stating, "You've struck water! Now to build the well."
+
+    * **Step 4: Completing Construction**
+        * A water-filled hole is not a finished well. The player must now use the **Crafting System** to finish the structure.
+        * The player will need to gather resources like stone and wood, then interact with the finished hole to build the final well structure (e.g., a stone wall, wooden frame, and bucket).
+        * Once the structure is built, the well becomes a functional water source.
+
+* **2. Establish a High Street:** The player must designate a central "high street" that will serve as the town's initial hub. This is an active, multi-step process.
+
+    ##### **High Street Mechanics**
+
+    * **Step 1: The Right Tool for the Job**
+        * The player must first craft or equip a hoe. This tool is used to clear and level the ground, preparing it for the main thoroughfare. Using the hoe will consume stamina, consistent with the game's **Survival Mechanics (Start Phase)**.
+
+    * **Step 2: Plotting and Leveling**
+        * The player uses the hoe on ground tiles to "plot" the street. Each tile the player hoes is converted from its natural state (e.g., grass, rough dirt) to a "leveled earth" tile.
+        * This action is not just cosmetic; it creates a defined path. The player must plot a continuous street of a minimum required length to be considered a proper high street.
+
+    * **Step 3: Integrating the Well**
+        * The plotted high street must incorporate the tile where the player has dug their well. When the street is officially designated, the area immediately around the well will visually upgrade to a small plaza, becoming the town's first landmark.
+
+    * **Step 4: Placing the Town Marker**
+        * Once the street is fully plotted, leveled, and includes the well, the player must craft and place a "Town Marker" or "Settlement Post" at one end of the street.
+        * This marker acts as a signal to new settlers, signifying that a new town has been established and is ready for growth. Placing this marker is the final action that completes this objective.
+
+* **3. Build a House:** The player must gather the necessary resources to construct their first personal house. This task is the culmination of the **Core Gameplay: Start Phase** and serves as a tutorial for the game's core building and crafting loops.
+
+    ##### **House-Building Mechanics**
+
+    * **Step 1: Laying the Blueprint**
+        * To begin, the player opens a build menu and selects the "Initial Shelter." This allows them to place a ghostly "blueprint" of the house's foundation on the ground.
+        * The player can position and rotate the blueprint, but it must be placed on relatively level ground and be accessible from the high street they just created. This introduces a light strategic element to town planning.
+
+    * **Step 2: Gathering and Processing Resources**
+        * With the blueprint placed, the player must gather the required raw materials. As noted in the GDD, this includes "wood, rocks, dirt, and pine tar".
+        * This process utilizes the game's core survival loops. The player uses tools (like an axe or pickaxe) to gather resources, which consumes stamina as defined by the **Survival Mechanics (Start Phase)**.
+        * These raw materials must then be processed using the **Crafting System**. For example, the player might need to craft logs into "Rough Planks," rocks into "Foundation Stones," and a mix of dirt and pine tar into "Daub" for sealing gaps. This requires a simple, player-built crafting station like a workbench.
+
+    * **Step 3: Phased Construction**
+        * The player brings the crafted components from their inventory to the blueprint site to begin construction. The building process is not instantaneous; it occurs in visible stages, giving the player a sense of tangible progress.
+        * Interacting with the blueprint site brings up a simple UI showing the required components for the current phase. As the player contributes materials, the house visually appears piece by piece:
+            1.  **Foundation:** The player first adds the "Foundation Stones," and a rough stone base appears on the blueprint.
+            2.  **Walls:** Next, the player adds the "Rough Planks," and the log cabin walls are erected one by one.
+            3.  **Sealing:** The player applies the "Daub," which visibly fills the gaps between the logs.
+            4.  **Roof & Door:** Finally, the player adds more planks to construct the roof and a door.
+        * This phased approach provides clear visual feedback that reflects the **Visual Style**'s emphasis on "Handmade wooden structures" and their evolution from "rough log cabins". Each construction action also consumes a small amount of stamina, making the entire process a meaningful investment of the player's time and energy for the day.
+
+Once these three objectives are met, the town is considered founded. The player is then prompted to name their new settlement, the Conestoga wagon becomes an immovable storage container, and the game fully enters the **Midgame Phase**.
 
 #### Item/Inventory Management
 #### Crafting System
 #### Combat System
 #### Fishing/Hunting Systems
+
+This system is built on the core concept of **"Patience and Tension"** rather than pure reflexes, fitting the "cozy yet challenging" tone of the game.
+
+##### Fishing: The Tension Reel
+This mini-game focuses on managing the tension of the fishing line while reeling in a catch. It's less about chasing a fast-moving icon and more about a rhythmic "give and take."
+
+* **Phase 1: Casting and Waiting**
+    * The player selects a spot on the water and casts their line.
+    * They wait for a bite, signaled by an audio cue (a "plunk" or splash) and a visual cue (the bobber dips). This phase is about patience and atmosphere, letting the player take in the environmental audio and visuals.
+
+* **Phase 2: The Mini-Game**
+    1.  **Hook the Fish:** When the bobber dips, the player has a generous window to click and hook the fish.
+    2.  **The Tension Bar:** A horizontal bar appears at the bottom of the screen. We can give it a **thematic** design so it looks like a bent fishing rod, a taut length of rope, or a weathered piece of wood with scratch marks on it. This approach ensures it feels like a natural part of the game world, rather than a generic UI element.
+    3.  **The "Sweet Spot":** A colored section, the "sweet spot," is on the bar. A fish icon moves left and right along the bar.
+    4.  **Reeling:** The player presses and holds the action button to "reel."
+        * If the fish is IN the sweet spot: Reeling is effective and quickly fills a "Catch Progress" meter.
+        * If the fish is OUTSIDE the sweet spot: Reeling puts stress on the line, causing the Tension Bar to turn red and a "Line Tension" meter to fill rapidly.
+    5.  **The Goal:** The player must fill the "Catch Progress" meter to 100%. If the "Line Tension" meter maxes out, the line snaps and the fish escapes. To lower tension, the player must simply *stop reeling* for a moment.
+
+* **Difficulty and Progression**
+    * **Easier than *Stardew Valley*:** The player's input is simpler (hold/release one button) rather than constantly trying to match vertical movement. The penalty for being outside the sweet spot is manageable tension, not instant loss of progress.
+    * **Fish Variety:** Weaker fish will have a larger "sweet spot" and move more slowly. Legendary or rare fish will move erratically and have a tiny sweet spot, requiring more careful tension management.
+    * **Skills and Gear:** The **Crafting System** comes into play here. A better fishing rod could widen the sweet spot. A stronger line could increase the max Line Tension. Different bait could make fish less energetic or more likely to stay in the sweet spot.
+
+##### Hunting: The Patient Hunter
+
+This mini-game adapts the "Patience and Tension" philosophy to hunting. It focuses on tracking, stealth, and taking a single, well-placed shot.
+
+* **Phase 1: Tracking**
+    * The player finds animal tracks in the wild. Following them might require a certain skill level.
+    * The player must move slowly and quietly (perhaps using a crouch/stealth mode) to approach the animal without spooking it. A "Detection Meter" could show how close the animal is to fleeing.
+
+* **Phase 2: The Mini-Game**
+    1.  **Take Aim:** Once the animal is in range, the player holds the action button to aim. This brings up a view with a swaying reticle.
+    2.  **The "Focus" Meter:** Holding your aim drains a "Focus" or "Stamina" meter. The longer you hold it, the more the reticle sways. Releasing the aim button allows Focus to recover.
+    3.  **The "Vitals" Zone:** The animal will have a small, briefly appearing "vitals" zone (similar to the fishing "sweet spot").
+    4.  **The Shot:** The player must time their click to fire when the swaying reticle aligns with the vitals zone.
+    5.  **The Goal:** A successful shot on the vitals results in a clean kill and higher quality loot (perfect pelt, more meat). A shot outside the vitals may only wound the animal, causing it to flee and yield lower quality materials if it's caught again. Missing entirely spooks all wildlife in the area for a time.
+
+* **Difficulty and Progression**
+    * **Similar Style:** Like fishing, this is not about frantic action. It's about a controlled "hold and release" mechanic tied to a meter (Focus vs. Tension) and timing a single action within a target zone.
+    * **Animal Variety:** Smaller, slower animals are easier targets. Larger predators or quick prey will have smaller vitals zones that appear for a shorter time.
+    * **Skills and Gear:** A better rifle could reduce reticle sway. The character's **Skills and Attributes Progression System** could increase the size of their Focus meter or slow its drain. Special ammo might make the vitals zone slightly larger.
 #### Economy System
 
 #### Controls/User Interface
     - Basic control mapping (keyboard/controller layout).
     - UI/UX sketches (inventory screens, town management screens).
 
-#### Progression System
+#### Skills and Attributes Progression System
     - How does the town/player grow over time? (You have this, but could show milestone examples.)
 ---
 ## Story and Narrative
