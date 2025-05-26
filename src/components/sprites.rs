@@ -1,3 +1,5 @@
+use std::ops::Mul;
+
 use bevy::{
     ecs::{bundle::Bundle, component::Component},
     prelude::{InheritedVisibility, Transform, ViewVisibility, Visibility},
@@ -17,6 +19,20 @@ pub enum Direction {
 impl From<Direction> for usize {
     fn from(val: Direction) -> Self {
         val as usize
+    }
+}
+
+impl From<Direction> for u32 {
+    fn from(val: Direction) -> Self {
+        val as u32
+    }
+}
+
+impl Mul<u32> for Direction {
+    type Output = u32;
+
+    fn mul(self, rhs: u32) -> Self::Output {
+        self as u32 * rhs
     }
 }
 /// Specifies the direction an entity is facing (given that the entity _can_ face more than one

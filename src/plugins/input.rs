@@ -157,8 +157,8 @@ fn keyboard_input_system(
     }
 
     // Also update the animation for the direction the player is facing
-    player_char.3.first_sprite_index = (player_char.0.clone() as usize) * 9;
-    player_char.3.last_sprite_index = player_char.3.first_sprite_index + 8;
+    player_char.3.first_sprite_index = (player_char.0.clone() as usize) * player_char.3.frames_in_animation.0;
+    player_char.3.last_sprite_index = player_char.3.first_sprite_index + (player_char.3.frames_in_animation.0 - 1);
 
     // Update the camera
     // Only move the camera until the left edge aligns with the left edge of the world, the

@@ -1,15 +1,11 @@
 use std::time::Duration;
 
 use bevy::{
-    app::{Plugin, Update},
-    ecs::{
+    app::{Plugin, Update}, asset::{Assets, Handle}, ecs::{
         schedule::{Condition, IntoScheduleConfigs},
         system::Single,
-    },
-    input::common_conditions::input_just_pressed,
-    log::info,
-    prelude::{Component, KeyCode, Query, Res, Sprite, State, TextureAtlas, With},
-    time::{Time, Timer, TimerMode},
+    }, input::common_conditions::input_just_pressed, log::info, prelude::{Component, KeyCode, Query, Res, Sprite, State, TextureAtlas, With}, time::{Time, Timer, TimerMode},
+    prelude::*,
 };
 use bevy_state::state::States;
 
@@ -22,6 +18,8 @@ use crate::{
 //            player character, but rather all sprites.
 #[derive(Component, Debug)]
 pub struct AnimationConfig {
+    /// The number of frames in the animation, columns and rows.
+    pub frames_in_animation: (usize, usize),
     pub first_sprite_index: usize,
     pub last_sprite_index: usize,
     pub fps: u8,
@@ -30,8 +28,9 @@ pub struct AnimationConfig {
 }
 
 impl AnimationConfig {
-    pub fn new(first_frame: usize, last_frame: usize, fps: u8) -> Self {
+    pub fn new(first_frame: usize, last_frame: usize, fps: u8, num_frames: (usize, usize)) -> Self {
         Self {
+            frames_in_animation: num_frames,
             first_sprite_index: first_frame,
             last_sprite_index: last_frame,
             fps,
@@ -152,8 +151,8 @@ fn trigger_animation<S: Component>(
 
     // Calculate the base index for the current direction's animation frames
     let direction_index = (*animation.1).clone() as usize;
-    animation.0.first_sprite_index = direction_index * 9;
-    animation.0.last_sprite_index = animation.0.first_sprite_index + 8;
+    animation.0.first_sprite_index = direction_index * 8;
+    animation.0.last_sprite_index = animation.0.first_sprite_index + 7;
 
     // Set the current frame to the first frame of the animation
     if let Some(texture_atlas) = animation.2.texture_atlas.clone() {
@@ -165,4 +164,24 @@ fn trigger_animation<S: Component>(
 
     animation.0.frame_timer = AnimationConfig::timer_from_fps(animation.0.fps);
     animation.0.should_run_animation = true;
+}
+
+pub struct AnimationUtils;
+
+impl AnimationUtils {
+    pub fn get_num_frames_for_animation(
+        assets: Res<Assets<Image>>,
+        image_handle: Handle<Image>,
+        sprite_width: u32,
+        sprite_height: u32
+    ) -> (u32, u32) {
+        // TODO_jwir3: We need to get metadata for this after the asset is loaded.
+        // let image = assets.get(image_handle).expect("Image not found in assets");
+        // let image_size = image.size();
+        // let num_columns = ((image_size.x / sprite_width) as f32).ceil() as u32;
+        // let num_rows = ((image_size.y / sprite_height) as f32).ceil() as u32;
+
+        // (num_columns, num_rows)
+        (8, 4)
+    }
 }

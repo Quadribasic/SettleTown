@@ -72,7 +72,11 @@ impl SettleTownLoadingSplashScreenPlugin {
             composite_alpha_mode: CompositeAlphaMode::PostMultiplied,
 
             #[cfg(target_os = "linux")]
-            composite_alpha_mode: CompositeAlphaMode::PreMultiplied,
+            // XXX_jwir3: We should be using CompositeAlphaMode::PreMultiplied here,
+            // but it causes issues with the splash screen on PopOS. Perhaps
+            // we need to detect what's available?
+            // composite_alpha_mode: CompositeAlphaMode::PreMultiplied,
+            composite_alpha_mode: CompositeAlphaMode::Auto,
 
             #[cfg(not(any(target_os = "macos", target_os = "linux")))]
             composite_alpha_mode: bevy::window::CompositeAlphaMode::Auto,

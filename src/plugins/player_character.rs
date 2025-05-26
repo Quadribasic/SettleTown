@@ -15,7 +15,7 @@ use bevy_state::state::States;
 
 use crate::{
     components::sprites::{Direction, DirectionalSprite, DirectionalSpriteBundle},
-    plugins::animation::AnimationConfig,
+    plugins::animation::{AnimationConfig, AnimationUtils},
     resources::config::SettleTownConfig, // resources::config::SettleTownConfig,
 };
 
@@ -51,21 +51,28 @@ fn spawn_player_character_entity(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    images: Res<Assets<Image>>,
 ) {
     info!("Spawning player character entity");
     // Load the necessary texture from a file for the player character
     let walkcycle_image: Handle<Image> =
         asset_server.load("custom/sprites/people/BadlandsBartWalkcycle.png");
-    // the sprite sheet has 9 sprites arranged in four rows, and they are all 64x64 pixels
-    let layout = TextureAtlasLayout::from_grid(UVec2::splat(64), 9, 4, None, None);
+    // let actual_image = images.get(&walkcycle_image).unwrap();
+    let num_frames = AnimationUtils::get_num_frames_for_animation(images, walkcycle_image.clone(), 64, 64);
+
+    // the sprite sheet has 8 sprites arranged in four rows, and they are all 64x64 pixels
+    let layout = TextureAtlasLayout::from_grid(UVec2::splat(64), num_frames.0, num_frames.1, None, None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
     let player_char_facing = Direction::default();
-    // There are 9 frames to each walkcycle animation.
+
+    // There are 8 frames to each walkcycle animation, computed through AnimationUtils.
     let pc_animation = AnimationConfig::new(
-        (player_char_facing.clone() as usize) * 9,
-        ((player_char_facing.clone() as usize) * 9) + 8,
+        (player_char_facing.clone() * num_frames.0) as usize,
+        ((player_char_facing.clone() * num_frames.0) + num_frames.0 - 1) as usize,
         PLAYER_CHARACTER_WALK_FPS,
+        (num_frames.0 as usize, num_frames.1 as usize),
     );
+    info!("Player character animation config: {:?}", pc_animation);
     let player_character_sprite = Sprite::from_atlas_image(
         walkcycle_image,
         TextureAtlas {
