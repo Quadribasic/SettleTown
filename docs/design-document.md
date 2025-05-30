@@ -542,6 +542,9 @@ Once these three objectives are met, the town is considered founded. The player 
 #### Item/Inventory Management
 #### Crafting System
 #### Combat System
+#### Quest System
+#### Skills and Attributes Progression System
+    - How does the town/player grow over time? (You have this, but could show milestone examples.)
 #### Fishing/Hunting Systems
 
 This system is built on the core concept of **"Patience and Tension"** rather than pure reflexes, fitting the "cozy yet challenging" tone of the game.
@@ -586,25 +589,156 @@ This mini-game adapts the "Patience and Tension" philosophy to hunting. It focus
     * **Similar Style:** Like fishing, this is not about frantic action. It's about a controlled "hold and release" mechanic tied to a meter (Focus vs. Tension) and timing a single action within a target zone.
     * **Animal Variety:** Smaller, slower animals are easier targets. Larger predators or quick prey will have smaller vitals zones that appear for a shorter time.
     * **Skills and Gear:** A better rifle could reduce reticle sway. The character's **Skills and Attributes Progression System** could increase the size of their Focus meter or slow its drain. Special ammo might make the vitals zone slightly larger.
+
 #### Economy System
+
+The economy of SettleTown is designed to be an engaging layer that intertwines with core gameplay loops such as resource gathering, crafting, town building, and NPC interaction. It aims to provide meaningful progression, player choice, and reflect the fluid nature of commerce on the frontier, from simple barter to more sophisticated financial transactions.
+
+###### Currency
+
+SettleTown will feature a tiered currency system, reminiscent of historical Old West denominations, providing a tangible sense of wealth progression.
+
+* **Denominations & Naming:**
+    * **Copper ("Bits"):** The smallest unit of currency, representing common, everyday transactions. Think of loose change, small payments for simple goods or services. For example, a single piece of fruit or a cheap drink at the saloon might cost a few Bits.
+    * **Silver ("Dollars"):** The standard unit of currency for most significant transactions. A good quality tool, a day's wages for an NPC, or a plot of land might be valued in Dollars. The term "Dollar" is chosen for its familiarity and direct relevance to the Old West setting. (Conversion: 100 Bits = 1 Dollar)
+    * **Gold ("Eagles"):** The highest tier of currency, representing substantial wealth, major investments, or large-scale transactions. The name "Eagles" is chosen to give a unique flavor to this valuable currency. This was a common term for U.S. gold coins of certain denominations ($10 gold pieces were called Eagles). It's historically thematic to the Old West.
+
+* **Acquisition & Utility:**
+    * **Earning Currency:** Players can earn currency through various activities:
+        * Selling raw resources (wood, ore, hides) and crafted goods (tools, furniture, clothing, food products).
+        * Completing tasks or quests for NPCs.
+        * Character-specific actions: BankerBill might generate income through investments or loans; EntrepreneurEllie profits from her General Store; KillerKate might acquire wealth through illicit means.
+        * Special events or discovering valuable items (e.g., gold panning, treasure hunting).
+    * **Spending Currency:** Currency is essential for:
+        * Purchasing goods and services from NPC merchants or establishments (General Store, Blacksmith, Saloon).
+        * Acquiring new building blueprints or upgrading existing town structures.
+        * Hiring NPCs for specific tasks or roles within the town.
+        * Investing in town projects or personal ventures.
+        * Paying taxes or fines (if implemented through governance systems).
+
+##### Barter System
+
+Reflecting the realities of frontier life where hard currency could be scarce, a barter system will exist alongside the currency-based economy.
+
+* **Mechanics:**
+    * Players can engage in direct item-for-item trades with certain NPCs or in specific situations.
+    * Each item in the game will have an underlying base value (in Bits/Dollars/Eagles). When bartering, a simple UI will show the perceived value of the items being offered by both parties.
+    * A successful barter will typically require the player to offer items of roughly equal or slightly greater perceived value than what they wish to receive.
+    * Some items might be considered "trade goods" with stable barter values (e.g., sacks of flour, bolts of cloth, preserved meats).
+
+* **Influencing Factors:**
+    * **NPC Preferences & Personality:** Some NPCs (e.g., a reclusive trapper, newly arrived settlers with few coins) might prefer or be more willing to barter than use currency. An NPC's personality (e.g., "Greedy," "Fair-minded") can influence their willingness to accept a deal or the perceived value they place on items.
+    * **Player Skills/Reputation:** Characters like EntrepreneurEllie with her "Keen Barter" skill may achieve more favorable barter terms. A player's high reputation with an NPC or within the town might also lead to better deals.
+    * **Scarcity/Need:** The value of certain goods in a barter exchange might fluctuate. For example, medicine might be highly valued during an outbreak of sickness, or food during a harsh winter.
+
+* **Usage:**
+    * Bartering might be more prevalent in the **Start Phase** when currency is less common.
+    * It can be a viable option for players who focus on resource gathering and crafting, allowing them to convert surplus goods directly into other needed items without first selling for currency.
+    * Specific quests or interactions may require bartering.
+    * Currency can increase in a town under specific conditions. Once a Bank is established, the _amount_ of currency in a town is tracked. Things like bank robberies, train robberies, and other events may increase or decrease currency availability in the town.
+
+##### Town Economy & Specialization
+
+The broader economy of SettleTown will be dynamic, influenced by player actions, town development, and character interactions.
+
+* **Resource & Goods Valuation:**
+    * The base value of resources and crafted items will be relatively stable, but local supply and demand, influenced by town growth, settler needs, and active industries, can cause minor fluctuations. (Further detailed in "Market Fluctuations & Value Stability").
+    * Quality of goods (e.g., a masterfully crafted rifle vs. a crude one) will significantly impact their value.
+
+* **Economic Buildings & NPCs:**
+    * **General Store (EntrepreneurEllie):** The primary hub for buying and selling common goods. Ellie's management can influence local prices and availability.
+    * **Bank (BankerBill):** Facilitates storage of wealth, offers loans (potentially to the player or the town itself, with interest), and enables larger investments. BankerBill might try to manipulate the local economy for his benefit.
+    * **Post Office:** Enables trade with distant markets, potentially offering better prices for certain goods but with added costs or delays for shipping. This can introduce external economic events like "market booms" for specific products.
+    * **Specialized Merchants:** As the town grows, specialized merchants (e.g., a gunsmith, a tailor, a luxury goods trader) may arrive, offering unique items and buying specific types of goods at premium prices.
+
+* **Impact of Town Specialization:**
+    * **Ranching:** Focus on livestock and animal products would make these highly available locally, potentially lowering their buy price in town but making them profitable for "export" via the Post Office.
+    * **Mining:** Ore and refined metals would be key economic drivers.
+    * **Trade Hub:** A town focused on trade might see more visiting merchants and a wider variety of goods, with prices potentially influenced by tariffs or trade agreements the player (as mayor) might establish.
+    * **Outlaw Haven (KillerKate):** The economy might revolve around illicit goods, fencing stolen items, and "protection" rackets. Legitimate trade might suffer.
+
+##### Market Fluctuations & Value Stability
+
+To simulate a living economy, the value of goods and even the purchasing power of currency itself can change due to various internal and external pressures. This system introduces elements of inflation (prices rise, currency buys less) and deflation (prices fall, currency buys more).
+
+* **Local Supply & Demand:**
+    * **Player Impact:** If a player floods the market by consistently selling large quantities of a specific item (e.g., iron ore, wooden furniture), the price local merchants are willing to pay for that item will gradually decrease (local deflation for that item). Conversely, if the player or town heavily consumes a resource that becomes scarce locally, its price will rise.
+    * **Town Needs:** As the town grows and new settlers arrive with diverse needs (e.g., more food, building materials, specific tools), demand for these goods will increase, potentially raising their prices if supply doesn't keep up.
+    * **Production Bottlenecks:** If a key resource producer (e.g., the blacksmith, a specific farm) is struggling or ceases operation, items they supply will become scarcer and more expensive.
+
+* **External Market Influences & Events:**
+    * **Trade Routes:** Opening new trade routes via the Post Office or special visitor events (e.g., a trade caravan) can introduce cheaper goods (potentially causing local deflation for those items) or create new demand for local products (driving up their prices).
+    * **Resource Booms/Busts:** A significant new ore strike nearby (even outside the player's direct control) could devalue existing ores or metals through increased supply. A "gold rush" event, for instance, might lead to a rapid influx of Eagles, potentially causing general inflation as more currency chases a relatively stable amount of goods.
+    * **Wider Economic Conditions:** Narrative events like a "Panic of 'XX" (referencing historical economic downturns) or news of a war "back East" could trigger broader inflation (e.g., for manufactured goods) or deflation (e.g., for luxury items as disposable income tightens). These could be tied to the "market crashes" mentioned in the Endgame Phase.
+
+* **Currency Stability:**
+    * While direct manipulation of the Bits-to-Dollars-to-Eagles conversion rates is not a primary mechanic, extreme economic events could affect the perceived value of the currency. For instance, if the town bank (especially if poorly managed by a corrupt BankerBill) were to issue too much unsecured "scrip" or local currency, it might become devalued compared to "hard" currency from outside.
+    * The discovery of a major counterfeit operation could temporarily destabilize faith in the currency, making barter more appealing.
+
+* **Player Strategy & Adaptation:**
+    * Players will need to be mindful of market conditions. Stockpiling goods when prices are low and selling when they are high can be a viable strategy.
+    * Diversifying the town's production can help weather price drops in a single commodity.
+    * Investing in infrastructure (like better roads via the Post Office for cheaper transport) could mitigate some inflationary pressures on imported goods.
+    * NPCs, especially merchants like EntrepreneurEllie, might offer quests or advice related to market conditions (e.g., "Heard they're paying top Dollar for wool in the next territory over!").
+
+* **Presentation to Player:**
+    * Changes in prices will be directly visible when trading with merchants.
+    * NPCs might comment on rising or falling prices ("Can barely afford flour these days!" or "Never seen lumber so cheap!").
+    * A town ledger or a section in the newspaper (if implemented) could provide summaries of general price trends for key commodities, hinting at inflation or deflation.
+
+##### Debt, Loans, and Financial Hardship
+
+* To add challenge and realism, systems for debt and loans could be implemented.
+    * Players might take loans from the Bank (or BankerBill) to fund significant purchases, but failing to repay could lead to consequences (loss of assets, negative reputation).
+    * The town itself might go into debt to fund major infrastructure, requiring players to manage the treasury carefully.
+* Events like "Bank Runs" (if the Bank is mismanaged or trust is lost) or "Market Crashes" (as mentioned in the Endgame Phase) could create periods of economic hardship and new gameplay challenges.
 
 #### Controls/User Interface
     - Basic control mapping (keyboard/controller layout).
     - UI/UX sketches (inventory screens, town management screens).
 
-#### Skills and Attributes Progression System
-    - How does the town/player grow over time? (You have this, but could show milestone examples.)
----
 ## Story and Narrative
     - Basic story structure (even in sandbox games, a light narrative thread helps).
     - Example NPC background stories or town events.
     - Supernatural lore snippets.
 
 ---
-## Sales and Marketing
-    - Premium game? DLC expansions? Cosmetic microtransactions?
-    - (Only if needed.)
+## Business Considerations
 
+### Sales
+  - **Initial Product:** The game will be sold as a premium base game, available for a price that is reasonable. The base game will be put on sale periodically through our distribution integrations (e.g. Steam), especially to incentivize purchase of DLCs.
+  - **Core Experience:** The base game will offer a complete and fulfilling gameplay experience. It is designed to be fully playable and enjoyable on its own, without the need to purchase any additional content.
+  - **Downloadable Content (DLC) Expansions:**
+    - A series of paid DLC expansions are planned to extend content, features, and explore new aspects of the SettleTown world post-launch.
+    - **Release Cadence:** We anticipate releasing one new paid DLC expansion every six months for the first two years of the game's life (totaling four planned expansions in this initial period).
+    - **Pricing & Bundles:** Each DLC will be available for individual purchase. Additionally, a bundle option will be offered, providing a discount for purchasing multiple DLCs together (e.g., a "Season Pass" or "Year 1 Bundle").
+    - **Narrative Integration:** DLCs will introduce new storylines, areas, or mechanics that complement the base game. However, the core narrative of the base game will remain consistent and self-contained. The purchase of DLCs will enrich the world and offer more to do, but will not be necessary to understand or complete the main story arcs established in the base game (similar to the narrative expansion style of games like Diablo II or The Sims, rather than a model where DLCs are essential to continue a fragmented core storyline).
+    - **Monetization Approach:** We will not include cosmetic microtransactions. Our focus is on providing substantial value through the base game and larger, meaningful DLC expansions.
+
+### Marketing
+
+### Publishing and Distribution
+- **Primary Strategy: Self-Publishing:**
+    - Our strong preference is to self-publish SettleTown.
+    - **Initial Platform Focus:** We plan to initially release on PC via digital storefronts like Steam, which aligns with our target audience and development platform (Rust/Bevy for PC).
+    - **Direct Control:** Self-publishing allows us to maintain full creative control, manage our release timeline directly, and retain a larger portion of the revenue.
+- **Consideration for Third-Party Publishing:**
+    - We are open to exploring partnerships with third-party publishers under specific, favorable conditions.
+    - **Key Motivator:** A publishing deal would be most attractive if it provides upfront funding (e.g., to complete development or fund initial marketing) at a reasonable return rate for the publisher. This could be a critical factor if external funding is necessary for the game to see the light of day.
+    - **Publisher Selection Criteria:**
+        - **Alignment and Reputation:** We would seek publishers known for fair dealings and a genuine understanding of indie games and their communities.
+        - **Avoidance of Predatory Practices:** We are explicitly not interested in working with publishers known for predatory contracts or unfavorable terms. Companies like EA (while likely not a fit for our scale) and TinyBuild are examples of publishers whose models we would avoid.
+        - **Cautious Consideration (e.g., Chucklefish):** Some publishers, like Chucklefish, might be considered. However, past experiences within the industry (such as their relationship with Stardew Valley) mean any such engagement would require careful due diligence and contract scrutiny to ensure a mutually beneficial and respectful partnership.
+- **Distribution Channels:**
+    - **Digital First:** Primary distribution will be through established digital PC storefronts (e.g., Steam).
+    - **Future Platforms:** As outlined in the "Platform" section, successful PC launch could lead to exploration of console distribution (XBox, Switch 2, PlayStation), which might involve different distribution partners or platform-specific publishing arms.
+
+
+### Financing
+    - How much will we need initially?
+    - How long is development expected to take?
+    - What will our costs be?
+    - What will our projected revenues be?
 ---
 ## Development
 ### Technical Details
@@ -614,3 +748,4 @@ This mini-game adapts the "Patience and Tension" philosophy to hunting. It focus
 ### Development Roadmap
     - Phases (Prototype → Alpha → Beta → Launch).
     - Priorities for first playable version.
+    - End of life considerations
