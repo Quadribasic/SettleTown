@@ -543,6 +543,7 @@ Once these three objectives are met, the town is considered founded. The player 
 #### Crafting System
 #### Combat System
 #### Quest System
+#### Achievement/Stats System
 #### Skills and Attributes Progression System
     - How does the town/player grow over time? (You have this, but could show milestone examples.)
 #### Fishing/Hunting Systems
