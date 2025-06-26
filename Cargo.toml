@@ -3,6 +3,14 @@ name = "SettleTown"
 version = "0.0.1"
 edition = "2021"
 
+[[bin]]
+name = "game"
+path = "src/main.rs"
+
+[[bin]]
+name = "editor"
+path = "src/editor.rs"
+
 [package.metadata.settletown]
 qualifier = "com"
 organization = "quadribasic"
@@ -22,6 +30,7 @@ mapgen = "0.4"
 rand = "0.8.5"
 serde = "1.0.215"
 toml = "0.8.22"
+bevy_egui = "0.34.1"
 # bevy_tiles = "0.1.0"
 
 [dev-dependencies]
